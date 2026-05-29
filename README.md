@@ -1,4 +1,4 @@
-# agent-harness-course
+# Agent Harness Course
 
 《从零构建 AI Agent 与 Harness Engineering 实战课程》静态课程站点。
 
