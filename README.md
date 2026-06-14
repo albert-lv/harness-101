@@ -7,13 +7,16 @@
 
 > **English**: This is the static course site for "Build AI Agents and Harness Engineering from Scratch" (Chinese).
 
+本课程提出 **Harness 12-Factor**：一套把“能跑的 Agent”打磨成“可上线 Harness”的生产级设计原则，并提供按模块的骨架代码（`starter/`）与参考实现（`solution/`）。
+
 ## 📚 Course Contents
 
 A hands-on course covering:
 
 - AI Agent fundamentals and design patterns
 - Harness Engineering for reliable, observable agent systems
-- Tool use, planning, memory, and evaluation
+- The **Harness 12-Factor** methodology for production agent runtimes
+- Tool use, planning, memory, sandboxing, and evaluation
 - Building production-ready agent workflows
 
 ## 🚀 Quick Start
@@ -35,7 +38,19 @@ python -m http.server 8000
 # Visit http://localhost:8000
 ```
 
-## 🌐 Deploy to GitHub Pages
+## 🌐 Deploy
+
+### Cloudflare Pages（默认）
+
+本项目通过 `wrangler.jsonc` 部署到 Cloudflare Pages：
+
+```bash
+npx wrangler pages deploy .
+```
+
+访问：<https://harness-101.pages.dev/>
+
+### GitHub Pages（备选）
 
 1. Push the `main` branch to GitHub.
 2. Go to **Settings → Pages**.
@@ -47,8 +62,20 @@ python -m http.server 8000
 
 ```
 ├── index.html                 # Single-file course website (CSS/JS inlined)
-├── agent-harness-course.md    # Course Markdown source
-└── README.md                  # This file
+├── agent-harness-course.md    # Course Markdown source (single source of truth)
+├── GLOSSARY.md                # Consistent terminology for contributors
+├── examples/                  # Per-module starter code and reference solutions
+│   ├── module-0/
+│   ├── module-1/
+│   ├── module-2/
+│   ├── module-4/
+│   └── module-6/
+├── wrangler.jsonc             # Cloudflare Pages deployment config
+├── sitemap.xml                # Sitemap for search engines
+├── robots.txt                 # Robots directives
+├── _headers                   # Cloudflare Pages response headers
+├── README.md                  # This file
+└── CONTRIBUTING.md            # Contribution guidelines
 ```
 
 ## ✏️ Contributing

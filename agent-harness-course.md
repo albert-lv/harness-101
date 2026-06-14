@@ -69,6 +69,48 @@
 
 ---
 
+# Harness 12-Factor：生产级 Agent 运行时设计原则
+
+> 本课程提出 **Harness 12-Factor**，一套把“能跑的 Agent”打磨成“可上线 Harness”的设计原则。它把后面 8 个模块的内容串成一张 checklist，也供你在自己的项目里直接使用。
+
+不要把 Agent 当 AI 来学，把它当成一个**不可靠的分布式节点**。Harness 12-Factor 就是围着这个节点做的工程约束：状态机、契约、预算、容错、权限、可观测、编排、配置、评估。
+
+## 12 条原则速查
+
+| # | 原则 | 一句话解释 | 对应模块 |
+|---|---|---|---|
+| 1 | **Single Agent Loop** | 一个清晰、可观测的状态机：思考 → 调用 → 观察 → 重复。 | 模块 1 |
+| 2 | **Explicit Tool Contract** | 每个工具必须有严格 schema、description、校验和幂等语义。 | 模块 2 |
+| 3 | **Context Budgeting** | 把 context 当有限资源：截断、摘要、外置记忆。 | 模块 3 |
+| 4 | **Failure-First Design** | 先枚举失败模式，再写防护代码，而不是 demo 跑通后补补丁。 | 模块 4 |
+| 5 | **Graceful Degradation** | 模型或工具失败时，系统降级而不是崩溃。 | 模块 4 |
+| 6 | **Least-Privilege Tooling** | 默认拒绝；危险操作需显式授权或沙箱。 | 模块 5 |
+| 7 | **Human-in-the-Loop Gates** | 不可逆操作暂停等人确认，状态可恢复。 | 模块 5 |
+| 8 | **Observable by Default** | 每一步都 emit 结构化事件；成本、延迟可见。 | 模块 6 |
+| 9 | **Reproducible Runs** | 用 trace + 配置可回放一次运行，足够定位问题。 | 模块 6 |
+| 10 | **Composable Agents** | 多 Agent 编排显式、隔离、失败可控。 | 模块 7 |
+| 11 | **Config-Driven Behavior** | 模型、prompt、工具列表、安全策略外置到配置。 | 贯穿 |
+| 12 | **Continuous Evaluation** | 用失败率、恢复率、完成率、成本衡量 Harness，而不是 demo 成功率。 | 结课项目 |
+
+## 12-Factor 检查清单（可直接用于结课项目自评）
+
+- [ ] **F1** Agent Loop 是手写状态机，终止条件明确。
+- [ ] **F2** 每个工具的 description / schema / 校验 / 错误返回 / 幂等性都经过设计。
+- [ ] **F3** 长任务或大工具输出不会撑爆 context，有截断/摘要/外置记忆策略。
+- [ ] **F4** 至少人为制造并处理过：死循环、跑偏、幻觉调用、部分失败。
+- [ ] **F5** 遇到 API 限流、工具异常、模型乱答时，系统能降级或重试。
+- [ ] **F6** 工具按上下文白名单启用，默认最小权限。
+- [ ] **F7** 不可逆/危险操作有人工确认门，支持挂起-恢复。
+- [ ] **F8** 每次运行都产生结构化事件日志，能看时间线。
+- [ ] **F9** 给定 trace 文件和配置，能复现或定位一次失败运行。
+- [ ] **F10** 多 Agent 场景下，子 Agent 失败不拖垮整体，结果合并策略清晰。
+- [ ] **F11** 关键行为（模型、prompt、工具列表、安全策略）可从配置切换，不重新打包代码。
+- [ ] **F12** 有量化指标：任务完成率、失败率、恢复率、平均 token 数、平均延迟。
+
+> **把 12-Factor 当作你的“Harness 成熟度模型”**：每满足一条，你的 Agent 就从 demo 向生产前进一步。
+
+---
+
 # 模块 0：环境与第一次 API 调用
 
 **学习目标**：搭好环境，理解一次 LLM 请求/响应的最小结构。
@@ -397,10 +439,23 @@ agent-harness-course/
 
 ## 后续扩展方向
 
-- 每个模块加骨架代码和参考实现
-- 加架构图 / 流程图（Agent loop 状态机图、Harness 分层图）
+- ✅ 每个模块加骨架代码和参考实现（见 `examples/`）
+- ✅ 统一术语表（见 `GLOSSARY.md`）
+- 加架构图 / 流程图（Agent loop 状态机图、Harness 分层图、12-Factor 关系图）
 - 内容膨胀后迁移到 VitePress（Markdown 驱动，迁移成本低）
 - 多语言支持（英文版）
+
+---
+
+## 术语表
+
+主要术语见 [`GLOSSARY.md`](./GLOSSARY.md)，包括：Agent、Harness、Agent Loop、Tool Contract、Context Budgeting、Idempotency、Allow-List、Human-in-the-Loop、Sandbox、Trace、Event、Orchestrator-Worker、12-Factor Harness、Config-Driven、Continuous Evaluation。
+
+---
+
+## 代码示例
+
+每个模块都提供 `starter/` 骨架代码和 `solution/` 参考实现，见 [`examples/`](./examples/)。
 
 ---
 
