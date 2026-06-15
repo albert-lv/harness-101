@@ -1,4 +1,4 @@
-# 模块 6：可观测性——Trace 与 Events
+# Factor 8：Observable by Default
 
 ## 运行方式
 
@@ -6,7 +6,7 @@
 python solution/trace_logger.py
 ```
 
-> 本模块展示 TraceLogger 的使用方式，需结合你的 Agent Loop 集成。
+> 本 Factor 展示 TraceLogger 的使用方式，需结合你的 Agent Loop 集成。
 
 ## 文件
 

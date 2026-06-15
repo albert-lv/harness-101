@@ -7,7 +7,7 @@
 
 > **English**: This is the static course site for "Build AI Agents and Harness Engineering from Scratch" (Chinese).
 
-本课程提出 **Harness 12-Factor**：一套把“能跑的 Agent”打磨成“可上线 Harness”的生产级设计原则，并提供按模块的骨架代码（`starter/`）与参考实现（`solution/`）。
+本课程以 **Harness 12-Factor** 为主线组织：前置 → F1-F12 → 进阶阅读 → 结课项目。每章提供骨架代码（`starter/`）与参考实现（`solution/`），把“能跑的 Agent”打磨成“可上线 Harness”。
 
 ## 📚 Course Contents
 
@@ -15,7 +15,19 @@ A hands-on course covering:
 
 - AI Agent fundamentals and design patterns
 - Harness Engineering for reliable, observable agent systems
-- The **Harness 12-Factor** methodology for production agent runtimes
+- The **Harness 12-Factor** methodology:
+  1. Single Agent Loop
+  2. Explicit Tool Contract
+  3. Context Budgeting
+  4. Failure-First Design
+  5. Graceful Degradation
+  6. Least-Privilege Tooling
+  7. Human-in-the-Loop Gates
+  8. Observable by Default
+  9. Reproducible Runs
+  10. Composable Agents
+  11. Config-Driven Behavior
+  12. Continuous Evaluation
 - Tool use, planning, memory, sandboxing, and evaluation
 - Building production-ready agent workflows
 
@@ -64,12 +76,20 @@ npx wrangler pages deploy .
 ├── index.html                 # Single-file course website (CSS/JS inlined)
 ├── agent-harness-course.md    # Course Markdown source (single source of truth)
 ├── GLOSSARY.md                # Consistent terminology for contributors
-├── examples/                  # Per-module starter code and reference solutions
-│   ├── module-0/
-│   ├── module-1/
-│   ├── module-2/
-│   ├── module-4/
-│   └── module-6/
+├── examples/                  # Per-Factor starter code and reference solutions
+│   ├── prep/                  # 前置：环境与第一次 API 调用
+│   ├── factor-1/              # Single Agent Loop
+│   ├── factor-2/              # Explicit Tool Contract
+│   ├── factor-3/              # Context Budgeting
+│   ├── factor-4/              # Failure-First Design
+│   ├── factor-5/              # Graceful Degradation
+│   ├── factor-6/              # Least-Privilege Tooling
+│   ├── factor-7/              # Human-in-the-Loop Gates
+│   ├── factor-8/              # Observable by Default
+│   ├── factor-9/              # Reproducible Runs
+│   ├── factor-10/             # Composable Agents
+│   ├── factor-11/             # Config-Driven Behavior
+│   └── factor-12/             # Continuous Evaluation
 ├── wrangler.jsonc             # Cloudflare Pages deployment config
 ├── sitemap.xml                # Sitemap for search engines
 ├── robots.txt                 # Robots directives

@@ -1,4 +1,4 @@
-# 模块 4：失败模式与容错
+# Factor 4：Failure-First Design
 
 ## 运行方式
 

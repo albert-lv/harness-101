@@ -1,4 +1,4 @@
-# 模块 1：手写 Agent Loop
+# Factor 1：Single Agent Loop
 
 ## 运行方式
 

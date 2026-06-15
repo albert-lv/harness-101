@@ -1,4 +1,4 @@
-# 模块 2：工具设计
+# Factor 2：Explicit Tool Contract
 
 ## 运行方式
 
@@ -6,7 +6,7 @@
 python solution/tools.py
 ```
 
-> 本模块不直接调用 LLM，主要展示工具接口设计、参数校验与幂等性。
+> 本 Factor 不直接调用 LLM，主要展示工具接口设计、参数校验与幂等性。
 
 ## 文件
 
