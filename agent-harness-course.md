@@ -281,6 +281,7 @@
 - **何时需要多 Agent**：任务可并行分解、需要隔离上下文、或需要不同"角色"分工时。
 - **主-子（orchestrator-worker）模式**：主 Agent 拆分任务、派发给子 Agent、汇总结果。
 - **上下文隔离**：每个子 Agent 有独立的 context，避免互相污染——子 agent 也是一种 context 管理手段。
+- **A2A 协议**（Agent-to-Agent Protocol）：不同 Harness 之间的 Agent 如何互相发现能力、协商任务。Google 2025 年提出的开放标准，与 MCP 互补——MCP 解决 Agent↔工具，A2A 解决 Agent↔Agent。当你的 Agent 需要调用外部团队/服务提供的 Agent 时，A2A 定义了统一的握手、任务委派和状态同步方式。
 - **并行执行**：多个子 Agent 同时跑，如何收集与合并结果。
 - **子 Agent 的失败处理**：一个子 agent 失败不应拖垮整体。
 - 编排的代价：更复杂、更贵、更难 debug——什么时候不该用多 Agent。
@@ -328,6 +329,11 @@
   - 人工介入率（human-in-the-loop rate）
 - **评估数据集**：收集真实任务和已知失败 case，定期回归。
 - **评估 harness**：写一个 runner，批量跑任务，自动判断成功/失败，输出报表。
+- **评估工具生态（2026）**：
+  - **DeepEval**：pytest 兼容的 LLM 评估框架，60+ 指标，原生 CI/CD 集成。
+  - **AgentAssay**：针对非确定性 Agent 工作流的回归测试，用行为指纹检测 86% 的回归（传统二进制测试为 0%）。
+  - **promptfoo**：声明式 YAML 提示测试 + 红队测试，50+ 漏洞插件。
+  - **LLM-as-Judge**：2026 年行业标准，53.3% 的组织在使用（LangChain 调研数据）。
 - **从评估回推设计**：哪个 Factor 的指标差，就优先改进哪个 Factor。
 
 **动手练习**
@@ -345,6 +351,12 @@
 
 **核心内容**
 - 推荐阅读对象（任选）：开源 Agent 运行时、Coding Agent 项目、或内部 Harness。
+- **2026 年值得精读的真实 Harness**：
+  - **Vercel AI SDK 6**：TypeScript 生态标杆，ToolLoopAgent + DevTools + MCP 完整支持，20M+ 月下载。
+  - **Mastra**：TypeScript 原生框架（22K+ stars），观察式记忆系统（Observer + Reflector Agent），企业级 RBAC。
+  - **Microsoft Agent Framework 1.0**：统一 Semantic Kernel + AutoGen，graph 编排 + middleware pipeline + DevUI 调试器。
+  - **OpenHands / SWE-agent**：开源 Coding Agent 运行时，看它们怎么在沙箱里安全执行代码。
+  - **Temporal.io + Agent 编排**：持久化 Agent 工作流，学习分布式系统的重试、状态机、活动监控如何应用于 Agent。
 - 带着具体问题读，而不是从头读到尾：
   - 它怎么管理 context？（F3）
   - 它怎么处理工具错误和死循环？（F4/F5）
@@ -504,6 +516,55 @@ agent-harness-course/
 - 加架构图 / 流程图（Agent loop 状态机图、Harness 分层图、12-Factor 关系图）
 - 内容膨胀后迁移到 VitePress（Markdown 驱动，迁移成本低）
 - 多语言支持（英文版）
+
+---
+
+# 附录：2026 Harness 生态速览
+
+> 本附录记录 2025-2026 年 Agent / Harness 领域的关键协议、框架和标准，供学习者在完成课程后快速了解业界全貌。
+
+## 协议层
+
+| 协议 | 发起方 | 解决的问题 | 与本课程关联 |
+|---|---|---|---|
+| **MCP** (Model Context Protocol) | Anthropic (2024) | 标准化 Agent 与外部工具/数据源的上下文交换 | F2（工具契约）、F6（权限） |
+| **A2A** (Agent-to-Agent) | Google (2025) | 不同 Agent 之间的能力发现与任务协作 | F10（Composable Agents） |
+| **AGENTS.md** | Anthropic → 社区标准 | 向编码 Agent 描述项目规范与安全约束 | F11（配置驱动） |
+| **SKILL.md** | Anthropic → 社区标准 | Agent Skill 包的标准格式 | F10-F12 |
+
+## 框架层（2026 年主流）
+
+| 框架 | 语言 | 核心特点 | 适用场景 |
+|---|---|---|---|
+| **Vercel AI SDK 6** | TypeScript | 20M+ 月下载，ToolLoopAgent、DevTools、MCP 完整支持 | Web / 全栈 TS 项目 |
+| **Mastra** | TypeScript | 22K+ stars，观察式记忆、企业 RBAC、远程沙箱 | 需要复杂记忆的企业级应用 |
+| **Microsoft Agent Framework 1.0** | Python / .NET | 统一 Semantic Kernel + AutoGen，graph 编排，DevUI | 微软生态 / 企业 .NET |
+| **OpenAI Agents SDK** | Python | 原生沙箱执行、可配置记忆、MCP 支持 | OpenAI 模型优先 |
+| **LangGraph** | Python / JS | 图结构编排，状态机显式化 | 复杂工作流 |
+| **Temporal + Agent** | 多语言 | 持久化 Agent 工作流，分布式系统级可靠性 | 长时运行任务 |
+
+## 评估工具
+
+| 工具 | 用途 | 与本课程关联 |
+|---|---|---|
+| **DeepEval** | pytest 兼容的 LLM 评估框架，60+ 指标 | F12 |
+| **AgentAssay** | 非确定性 Agent 回归测试，行为指纹 | F9/F12 |
+| **promptfoo** | 声明式提示测试 + 红队扫描 | F2/F12 |
+| **RAGAS** | RAG / Agent 质量评估 | F12 |
+
+## 值得关注的企业实践
+
+- **Shopify Roast**：Ruby DSL 结构化 AI 工作流，"非确定性是可靠性的敌人"——用确定性步骤（shell、代码）与 Agent 步骤交错，版本可控。
+- **Anthropic Claude Code 质量报告**：展示微小 Harness 调整（prompt 措辞、缓存头、默认参数）如何复合成可见的 Agent 退化。
+- **Red Hat 四支柱模型**：vibes → specs → skills → agents，从结构化上下文到 MCP 集成，从人类-Agent 协作视角定义 Harness。
+
+## 2026 年关键趋势
+
+1. **协议标准化**：MCP + A2A 正在统一 Agent 生态的"插口"，框架层不再各自造轮子。
+2. **评估即基础设施**：从"demo 能跑"到"CI 能通过"，Agent 评估成为上线门槛。
+3. **记忆系统分化**：短期 context（F3）vs 长期结构化记忆（Mastra Observer/Reflector）vs 检索增强（RAG）。
+4. **CodeAct 执行模式**：Agent 生成 Python 程序一次性调用多工具，比逐轮 tool call 减少 52% 延迟和 64% token。
+5. **Harness 即产品**：工程师的价值从写代码转向设计约束环境——"环境优先工程"。
 
 ---
 
