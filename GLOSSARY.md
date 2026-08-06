@@ -85,3 +85,23 @@ Trace 中的单个结构化记录。常见事件类型：think、tool_call、too
 ## Continuous Evaluation / 持续评估
 
 Harness 的质量不应只看 demo 是否成功，而应持续测量失败率、恢复率、任务完成率、成本与延迟。
+
+## MCP / Model Context Protocol
+
+Anthropic 提出的开放标准协议（2024），用于标准化 LLM 应用与外部数据源、工具之间的上下文交换。2025-2026 年被 OpenAI、Google 等广泛采纳，成为 Agent 工具集成的行业标准。
+
+## A2A / Agent-to-Agent Protocol
+
+Google 提出的开放协议（2025），用于不同 Agent 之间的任务发现、能力协商和协作通信。与 MCP 互补：MCP 解决 Agent↔工具，A2A 解决 Agent↔Agent。
+
+## AGENTS.md
+
+编码 Agent 的上下文文件标准（Anthropic 提出，OpenAI 等采纳），用于向 Agent 描述项目结构、规范和安全约束。相当于给 Agent 的"README"。
+
+## SKILL.md
+
+Agent Skill 的开放标准格式（Anthropic 提出），定义了 Agent 可以加载的技能包：指令集、工具定义、参考文档。被 OpenClaw 等平台采用。
+
+## CodeAct
+
+一种 Agent 执行模式（Microsoft 推广），Agent 生成短 Python 程序并在沙箱中一次性调用多个工具，相比逐轮 tool call 可减少 52% 延迟和 64% token 消耗。
