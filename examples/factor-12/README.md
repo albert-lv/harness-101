@@ -1,13 +1,12 @@
-# Factor 12：Continuous Evaluation
+# Factor 12: Continuous Evaluation
 
-## 运行方式
+## How to Run
 
 ```bash
-export ANTHROPIC_API_KEY=your_key
 python solution/evaluate.py
 ```
 
-## 文件
+## Files
 
-- `starter/evaluate.py`：骨架代码，留有 TODO。
-- `solution/evaluate.py`：批量任务评估 runner 与报表输出参考实现。
+- `starter/evaluate.py`: Skeleton code with TODOs.
+- `solution/evaluate.py`: Batch task evaluation runner and report output reference implementation.

@@ -1,13 +1,13 @@
-# Factor 4：Failure-First Design
+# Factor 4: Failure-First Design
 
-## 运行方式
+## How to Run
 
 ```bash
 export ANTHROPIC_API_KEY=your_key
 python solution/resilience.py
 ```
 
-## 文件
+## Files
 
-- `starter/resilience.py`：骨架代码，留有 TODO。
-- `solution/resilience.py`：集成最大步数、重复检测、未知工具拦截、API 重试的参考实现。
+- `starter/resilience.py`: Skeleton code with TODOs.
+- `solution/resilience.py`: Reference implementation integrating max steps, repetition detection, unknown tool interception, and API retry.

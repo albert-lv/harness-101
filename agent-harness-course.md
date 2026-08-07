@@ -1,571 +1,571 @@
-# 从零构建 AI Agent 与 Harness Engineering 实战课程
+# Hands-on Course: Build AI Agents and Harness Engineering from Scratch
 
-> 一门面向工程师的动手课：先手写一个 Agent，再把它打磨成可靠的运行时（Harness）。
-> 本课程以 **Harness 12-Factor** 为主线组织，每章对应一条生产级设计原则。
-
----
-
-## 这门课是给谁的
-
-- 会 Python、想真正搞懂 Agent 是怎么工作的工程师
-- 不满足于"调用 LangChain 跑个 demo"，想理解底层机制和失败模式的人
-- 想造 Agent 基础设施（编排、沙箱、权限、可观测性）的人
-
-**前置要求**：Python 基础、命令行、一个 LLM API Key（推荐 Anthropic Claude，亦可用任意兼容 API）。
-**不要求**：机器学习背景。本课把 LLM 当作一个"会偶尔抽风的不可靠节点"，用工程手段围着它做容错。
+> A hands-on course for engineers: first write an Agent by hand, then polish it into a reliable runtime (Harness).
+> This course is organized around the **Harness 12-Factor** principles, with each chapter corresponding to a production-grade design principle.
 
 ---
 
-## 核心心智模型（贯穿全程）
+## Who Is This Course For
 
-> **不要把 Agent 当 AI 来学，把它当成一个不可靠的分布式系统来学。**
+- Engineers who know Python and want to truly understand how Agents work
+- People who aren't satisfied with "calling LangChain to run a demo" and want to understand the underlying mechanisms and failure modes
+- People who want to build Agent infrastructure (orchestration, sandbox, permissions, observability)
 
-模型就是网络里一个会丢包、会乱序、偶尔返回垃圾的节点。你写的所有 Harness 代码，本质都是在围着这个不可靠节点做：重试、超时、幂等、状态机、可观测性、权限隔离。
+**Prerequisites**: Python basics, command line, and an LLM API Key (Anthropic Claude recommended; any compatible API works).
+**Not required**: Machine learning background. This course treats the LLM as an "occasionally flaky unreliable node" and builds resilience around it using engineering techniques.
 
-| 你熟悉的工程概念 | 在 Harness 里的对应 |
+---
+
+## Core Mental Model (Throughout the Course)
+
+> **Don't learn Agent as AI; learn it as an unreliable distributed system.**
+
+The model is just a node in the network that drops packets, delivers out of order, and occasionally returns garbage. All Harness code you write is essentially about building resilience around this unreliable node: retry, timeout, idempotency, state machine, observability, and privilege isolation.
+
+| Engineering Concepts You Already Know | The Harness Equivalent |
 |---|---|
-| 协议状态机 | Agent loop（思考→调用→观察→再思考） |
-| 重试 / 超时 / 幂等 | 工具调用失败恢复、避免重复副作用 |
-| 丢包 / 降级 | context 截断、模型乱答的兜底 |
-| 抓包 / 可观测性 | trace / events（没有它就无法 debug agent） |
-| ACL / 防火墙 / 沙箱 | 权限模型、工具白名单、文件访问隔离 |
+| Protocol state machine | Agent loop (think → call → observe → think again) |
+| Retry / timeout / idempotency | Tool call failure recovery, avoiding duplicate side effects |
+| Packet drop / degradation | Context truncation, fallback for model hallucinations |
+| Packet capture / observability | Trace / events (without it you cannot debug the agent) |
+| ACL / firewall / sandbox | Permission model, tool allowlist, file access isolation |
 
 ---
 
-## 两个关键术语
+## Two Key Terms
 
-- **Agent**：让模型"做事"的循环——它能调用工具、观察结果、做多步决策，而不只是一问一答。
-- **Harness（运行时/脚手架）**：把裸 LLM API 包装成可靠 Agent 的全部工程代码——上下文管理、prompt 组装、工具执行、权限沙箱、子 agent 调度、错误恢复、trace。Claude Code、Cursor、OpenHands 本质上都是 Harness。
+- **Agent**: A loop that lets the model "do things" — it can call tools, observe results, and make multi-step decisions, rather than just a single Q&A.
+- **Harness (Runtime / Scaffolding)**: All the engineering code that wraps a bare LLM API into a reliable Agent — context management, prompt assembly, tool execution, permission sandbox, sub-agent scheduling, error recovery, trace. Claude Code, Cursor, and OpenHands are fundamentally all Harnesses.
 
-本课**先建 Agent，再升级为 Harness**，让你对"为什么 agent 会失败"有亲身体感。
-
----
-
-## 学习哲学
-
-1. **先手写，后用框架**：框架的抽象会挡住你看本质。前几章一行框架不用。
-2. **刻意制造失败**：Harness Engineering 的全部价值都在失败模式里。没踩过坑，读再多设计文档都没用。
-3. **带着问题读源码**：先自己踩坑，再去读成熟 Harness——每个设计决策你都能"哦原来是为了这个"。
-4. **每章有产出物**：每章结束都有一个能跑的东西，可直接放进你的 GitHub 仓库。
+This course **builds the Agent first, then upgrades it to a Harness**, giving you firsthand experience of "why agents fail."
 
 ---
 
-## 课程结构总览（Harness 12-Factor）
+## Learning Philosophy
 
-| Factor | 原则 | 关键产出 | 原模块映射 |
+1. **Handwrite first, then use frameworks**: Framework abstractions block you from seeing the essence. The first few chapters use zero frameworks.
+2. **Deliberately manufacture failures**: All the value of Harness Engineering lies in failure modes. You won't learn anything from reading design docs without having stepped in the mud.
+3. **Read source code with questions in mind**: First step in the mud yourself, then read mature Harness code — every design decision will click with an "ah, that's why."
+4. **Every chapter has a deliverable**: At the end of each chapter you have something that runs, ready to drop into your GitHub repository.
+
+---
+
+## Course Structure Overview (Harness 12-Factor)
+
+| Factor | Principle | Key Deliverable | Original Module Map |
 |---|---|---|---|
-| 前置 | 环境与第一次 API 调用 | 跑通最小 LLM 调用 | 模块 0 |
-| F1 | Single Agent Loop | 100 行的最小 Agent | 模块 1 |
-| F2 | Explicit Tool Contract | 一套健壮的工具接口 | 模块 2 |
-| F3 | Context Budgeting | 不会爆 context 的 Agent | 模块 3 |
-| F4 | Failure-First Design | 能从错误中恢复的 Agent | 模块 4 上 |
-| F5 | Graceful Degradation | 模型/工具失败时 degrade 而非崩溃 | 模块 4 下 |
-| F6 | Least-Privilege Tooling | 危险操作有确认门的 Agent | 模块 5 上 |
-| F7 | Human-in-the-Loop Gates | 不可逆操作人工确认、可恢复 | 模块 5 下 |
-| F8 | Observable by Default | 可被完整 debug 的 Agent | 模块 6 上 |
-| F9 | Reproducible Runs | 用 trace 回放一次运行 | 模块 6 下 |
-| F10 | Composable Agents | 主-子 agent 编排器 | 模块 7 |
-| F11 | Config-Driven Behavior | 模型/prompt/工具/策略外置配置 | 新增 |
-| F12 | Continuous Evaluation | 能量化评估的 Harness | 新增 |
-| 进阶 | 阅读真实 Harness | 一份源码精读笔记 | 模块 8 |
-| 结课 | 一个完整的领域 Agent | 综合运用 12-Factor | 结课项目 |
+| Prerequisite | Environment and first API call | Get the minimal LLM call working | Module 0 |
+| F1 | Single Agent Loop | 100-line minimal Agent | Module 1 |
+| F2 | Explicit Tool Contract | A robust set of tool interfaces | Module 2 |
+| F3 | Context Budgeting | An Agent that won't blow up its context | Module 3 |
+| F4 | Failure-First Design | An Agent that can recover from errors | Module 4 (upper) |
+| F5 | Graceful Degradation | An Agent that degrades rather than crashes when model/tool fails | Module 4 (lower) |
+| F6 | Least-Privilege Tooling | An Agent with confirmation gates for dangerous operations | Module 5 (upper) |
+| F7 | Human-in-the-Loop Gates | Irreversible operations require human confirmation, recoverable | Module 5 (lower) |
+| F8 | Observable by Default | An Agent that can be fully debugged | Module 6 (upper) |
+| F9 | Reproducible Runs | Reproduce a run using a trace | Module 6 (lower) |
+| F10 | Composable Agents | Master-sub-agent orchestrator | Module 7 |
+| F11 | Config-Driven Behavior | Model/prompt/tool/strategy configuration externalized | New |
+| F12 | Continuous Evaluation | A Harness that can be quantitatively evaluated | New |
+| Advanced | Reading Real Harnesses | A source-code deep-dive note | Module 8 |
+| Wrap-up | A complete domain Agent | Comprehensive application of 12-Factor | Capstone project |
 
-建议节奏：前置 + F1-F3 约两周，F4-F7 约三到四周（F4-F5 最关键，别赶），F8-F12 + 进阶 + 结课项目按兴趣延展。
-
----
-
-# 前置：环境与第一次 API 调用
-
-**学习目标**：搭好环境，理解一次 LLM 请求/响应的最小结构。
-
-**核心内容**
-- 安装 SDK（`anthropic` 或等价物），配置 API Key（用环境变量，别硬编码）。
-- 一次最小调用的三要素：system prompt、messages、模型参数。
-- 理解 token 的概念：输入输出都按 token 计费和计长度，这决定了后面 context 管理的一切。
-- 流式 vs 非流式响应的区别。
-
-**动手练习**
-- 写一个 `chat.py`，从命令行接收一句话，打印模型回复。
-- 加一个多轮对话循环，手动维护 `messages` 列表，观察 context 如何随轮次增长。
-
-**产出物**：一个能多轮对话的命令行脚本，并能打印每轮消耗的 token 数。
+Suggested pace: Prerequisite + F1-F3 in about two weeks, F4-F7 in about three to four weeks (F4-F5 are the most critical — don't rush), F8-F12 + Advanced + Capstone project as interest-driven extensions.
 
 ---
 
-# F1：Single Agent Loop
+# Prerequisite: Environment and First API Call
 
-**学习目标**：亲手实现 Agent 的核心——一个带工具的 REPL 循环。理解"Agent 不是魔法"。
+**Learning Goal**: Set up the environment and understand the minimal structure of an LLM request/response.
 
-**核心内容**
-- Agent loop 的本质是状态机：`调模型 → 解析工具调用 → 执行工具 → 结果塞回 context → 再调模型`，直到模型说"做完了"。
-- Tool calling 协议：如何告诉模型有哪些工具可用（name / description / 参数 schema）。
-- 如何解析模型返回的 tool_use 块，分发到对应的 Python 函数。
-- 循环终止条件：模型不再请求工具时结束。
+**Core Content**
+- Install SDK (`anthropic` or equivalent), configure API Key (use environment variables, don't hardcode).
+- The three elements of a minimal call: system prompt, messages, model parameters.
+- Understand the concept of tokens: both input and output are billed and measured in tokens; this determines everything about context management later.
+- Difference between streaming and non-streaming responses.
 
-**动手练习**
-- 用约 100 行 Python 实现 loop，**不用任何 agent 框架**。
-- 注册第一个工具，例如 `run_command(cmd)` 跑 `ping` / `traceroute`，或文件读取、计算器等。
-- 让 Agent 完成一个需要 2-3 步工具调用的任务，打印每一步的思考和动作。
+**Hands-on Exercises**
+- Write a `chat.py` that receives a sentence from the command line and prints the model's reply.
+- Add a multi-turn conversation loop, manually maintain the `messages` list, and observe how context grows with each turn.
 
-**产出物**：一个最小但完整的 Agent，能自主调用工具完成多步任务。
-**关键体感**：Agent 就是个"会自己决定下一步调什么"的循环——魔法消失了。
+**Deliverable**: A command-line script that can do multi-turn conversation and print the token count consumed per turn.
 
 ---
 
-# F2：Explicit Tool Contract
+# F1: Single Agent Loop
 
-**学习目标**：工具是 Agent 与世界的唯一接口。学会设计让模型用得对、用得稳的工具。
+**Learning Goal**: Implement the core of an Agent by hand — a tool-equipped REPL loop. Understand that "Agent is not magic."
 
-**核心内容**
-- **工具描述就是 prompt**：description 写得烂，模型就用得错。
-- 参数校验：模型可能传错类型、缺字段、传幻觉出来的值——工具内部必须校验。
-- 返回值设计：返回给模型的应该是"模型能理解并据此决策"的信息，不是原始堆栈。
-- 错误返回：把错误作为正常返回值喂回去（让模型自己纠正），而不是抛异常崩掉 loop。
-- 副作用与幂等：有写操作的工具要考虑重复调用的后果。
+**Core Content**
+- The essence of the Agent loop is a state machine: `call model → parse tool call → execute tool → feed result back into context → call model again`, until the model says "done."
+- Tool calling protocol: how to tell the model which tools are available (name / description / parameter schema).
+- How to parse the model's returned tool_use blocks and dispatch to the corresponding Python function.
+- Loop termination condition: the loop ends when the model no longer requests tools.
 
-**动手练习**
-- 重构 F1 的工具，加上参数校验和友好的错误返回。
-- 设计一个有副作用的工具（如写文件 / 改配置），思考如何防止重复执行。
-- 故意给模型一个描述模糊的工具，观察它如何用错。
+**Hands-on Exercises**
+- Implement the loop in about 100 lines of Python, **without any agent framework**.
+- Register the first tool, e.g. `run_command(cmd)` to run `ping` / `traceroute`, or file read, calculator, etc.
+- Have the Agent complete a task requiring 2-3 tool calls, and print each step's thought and action.
 
-**产出物**：一套健壮的工具接口规范 + 2-3 个示例工具。
-
----
-
-# F3：Context Budgeting
-
-**学习目标**：解决 Agent 第一个会撞墙的真实问题——context 爆掉。
-
-**核心内容**
-- 为什么会爆：每轮工具结果都累积进 context，长任务或大输出会迅速撑满窗口。
-- 三类应对策略：
-  - **截断**：只保留工具输出的关键部分。
-  - **摘要**：把早期对话压缩成摘要再继续。
-  - **外置记忆**：把大块信息存到文件/数据库，context 里只留指针。
-- 何时该用哪种，以及它们的代价（信息丢失 vs 额外调用成本）。
-- 系统提示（system prompt）的角色：哪些信息应该常驻、哪些应该动态注入。
-
-**动手练习**
-- 给 Agent 一个会输出几千行的工具，复现 context 爆掉。
-- 实现一个简单的输出截断策略，再实现一个"超过阈值就摘要"的策略。
-- 对比两种策略下 Agent 完成任务的质量差异。
-
-**产出物**：一个不会因长任务而崩溃的 Agent。
+**Deliverable**: A minimal but complete Agent that can autonomously call tools to complete multi-step tasks.
+**Key Takeaway**: An Agent is just a loop that "decides what to call next on its own" — the magic disappears.
 
 ---
 
-# F4：Failure-First Design
+# F2: Explicit Tool Contract
 
-**学习目标**：Harness Engineering 真正开始的地方。系统性地认识并修复 Agent 的失败模式。
+**Learning Goal**: Tools are the Agent's only interface with the world. Learn to design tools that the model uses correctly and reliably.
 
-**核心内容**
-- **死循环**：工具反复报错，模型反复重试同一动作。如何检测并打断（最大步数、重复检测）。
-- **跑偏**：多步任务中 Agent 偏离目标。如何用阶段性目标、自检、人工介入拉回来。
-- **幻觉调用**：模型调用不存在的工具，或编造参数。Harness 层拦截并纠正。
-- **部分失败恢复**：多步任务中途某步失败，如何继续而不是从头再来。
-- **重试与退避**：API 限流、超时——网络/后端工程师最熟悉的部分，直接迁移经验。
+**Core Content**
+- **Tool description is prompt**: a poorly written description means the model uses the tool wrong.
+- Parameter validation: the model may pass wrong types, missing fields, or hallucinated values — tools must validate internally.
+- Return value design: what is returned to the model should be information "the model can understand and use to make decisions," not raw stack traces.
+- Error returns: feed errors back as normal return values (let the model correct itself) rather than throwing exceptions that crash the loop.
+- Side effects and idempotency: tools with write operations must consider the consequences of repeated calls.
 
-**动手练习**
-- 人为制造每一种失败：让工具报错、注入限流、给一个不存在的工具名。
-- 为每种失败写 Harness 防护：最大步数限制、重复动作检测、未知工具拦截、API 重试。
-- 跑一个真实的多步任务，记录它在哪里跑偏，并改进。
+**Hands-on Exercises**
+- Refactor F1's tools, adding parameter validation and friendly error returns.
+- Design a tool with side effects (e.g. writing a file / changing config), and think about how to prevent repeated execution.
+- Deliberately give the model a vaguely described tool and observe how it misuses it.
 
-**产出物**：一个能从多种错误中自我恢复的 Agent。
-**核心体感**：写 Agent 的代码里，"让它工作"只占 20%，"让它在出错时不崩"占 80%——这就是 Harness Engineering。
-
----
-
-# F5：Graceful Degradation
-
-**学习目标**：当模型或工具失败时，系统能降级而不是崩溃。
-
-**核心内容**
-- **降级策略金字塔**：完全成功 → 部分成功 → 返回近似结果 → 返回安全兜底 → 优雅失败。
-- **模型侧降级**：模型拒绝/乱答时，用更简单的 prompt、更小的模型或预设模板重试。
-- **工具侧降级**：工具超时/异常时，返回"该工具不可用"，让模型换路径。
-- **部分结果也值钱**：多步任务中已完成的部分应保留，而不是全丢。
-- **用户可见的降级**：当 Agent 无法完成时，给出清晰的状态说明，而不是堆栈跟踪。
-
-**动手练习**
-- 给 F4 的 Agent 加一个"降级模式"开关。
-- 模拟工具完全不可用，观察 Agent 是否能给出替代方案或部分结果。
-- 设计一个"安全兜底回复"，在模型连续乱答时返回。
-
-**产出物**：一个面对失败能 degrade 而非 crash 的 Agent。
+**Deliverable**: A robust tool interface specification + 2-3 example tools.
 
 ---
 
-# F6：Least-Privilege Tooling
+# F3: Context Budgeting
 
-**学习目标**：让 Agent 安全地接触真实世界。Harness 的安全核心。
+**Learning Goal**: Solve the first real wall an Agent hits — context overflow.
 
-**核心内容**
-- **为什么需要**：Agent 会自主决定动作，一个错误的写操作可能删数据、改生产配置。
-- **工具白名单**：哪些工具可调、在什么上下文可调。
-- **沙箱执行**：把工具运行在隔离环境里（受限文件系统、网络隔离、只读模式）。
-- **最小权限原则**：默认只读，写操作显式授权——和防火墙 ACL 一个思路。
+**Core Content**
+- Why it overflows: every round of tool results accumulates into context; long tasks or large outputs quickly fill the window.
+- Three categories of coping strategies:
+  - **Truncation**: keep only the key part of tool output.
+  - **Summarization**: compress early conversation into a summary and continue.
+  - **External memory**: store large chunks of information in files/database; keep only pointers in context.
+- When to use which, and their tradeoffs (information loss vs extra call cost).
+- The role of system prompt: which information should be permanent, which should be dynamically injected.
 
-**动手练习**
-- 给有副作用的工具加一道人工确认门，确认通过才执行。
-- 实现一个"只读模式"开关：开启时所有写操作直接被 Harness 拦截。
-- 写下你的 Agent 的"权限模型"：哪些操作自动放行、哪些必须确认、哪些永远禁止。
+**Hands-on Exercises**
+- Give the Agent a tool that outputs thousands of lines, reproduce the context overflow.
+- Implement a simple output truncation strategy, then implement a "summarize when exceeding threshold" strategy.
+- Compare task completion quality under the two strategies.
 
-**产出物**：一个危险操作必须经人工确认、默认最小权限的 Agent。
-
----
-
-# F7：Human-in-the-Loop Gates
-
-**学习目标**：不可逆操作必须暂停等人确认，并支持挂起-恢复。
-
-**核心内容**
-- **确认门的状态机**：运行中 → 挂起等待确认 → 恢复执行 → 完成。
-- **可恢复状态**：挂起时保存完整 context 和 trace，人可以离开、稍后恢复。
-- **批量确认 vs 单条确认**：不同风险等级用不同策略。
-- **超时与默认行为**：人类多久不响应时该做什么（取消 / 使用默认安全选项）。
-- **审计日志**：谁、在什么时间、确认了什么操作。
-
-**动手练习**
-- 在 F6 的基础上，把"确认"做成 loop 内的显式状态，而不是工具内简单打印。
-- 实现挂起-恢复：程序退出后重新加载状态，继续执行。
-- 给确认门加超时策略和审计事件。
-
-**产出物**：一个具备可恢复人工确认门的 Agent。
+**Deliverable**: An Agent that won't crash under long tasks.
 
 ---
 
-# F8：Observable by Default
+# F4: Failure-First Design
 
-**学习目标**：没有 trace，你无法 debug Agent。让 Agent 的每一步都可见、可回放。
+**Learning Goal**: Where Harness Engineering truly begins. Systematically identify and fix Agent failure modes.
 
-**核心内容**
-- **为什么必须**：Agent 是非确定性的，同样输入可能走不同路径。出问题时你需要知道"它当时到底想了什么、调了什么、看到了什么"。Agent 版的抓包。
-- **事件模型**：把 loop 的每一步都发成结构化事件（开始思考 / 决定调用工具 / 工具返回 / 错误 / 完成）。
-- **结构化日志**：记录每步的输入输出、token 消耗、耗时。
-- **回放与调试**：如何用记录的 trace 复现一次 Agent 运行。
-- 成本与延迟的可观测：每个任务花了多少 token、多少钱、多少时间。
+**Core Content**
+- **Infinite loops**: tool repeatedly errors, model repeatedly retries the same action. How to detect and break (max steps, repeat detection).
+- **Drift**: in multi-step tasks the Agent deviates from the goal. How to pull it back with phased goals, self-checks, and human intervention.
+- **Hallucinated calls**: the model calls a nonexistent tool, or fabricates parameters. Intercept and correct at the Harness layer.
+- **Partial failure recovery**: in a multi-step task when one step fails, how to continue instead of starting over.
+- **Retry and backoff**: API rate limits, timeouts — the most familiar part for network/backend engineers, directly transfer your experience.
 
-**动手练习**
-- 给 Agent loop 加一层事件发射，把每一步写成结构化日志（JSON 行）。
-- 写一个简单的查看器，把一次运行的 trace 以可读时间线打印出来。
-- 用 trace 去 debug 一个之前跑偏的任务，定位它在哪一步走错。
+**Hands-on Exercises**
+- Artificially manufacture each type of failure: make tools error, inject rate limits, give a nonexistent tool name.
+- Write Harness guards for each failure: max step limit, repeat action detection, unknown tool interception, API retry.
+- Run a real multi-step task, record where it drifts, and improve.
 
-**产出物**：一个每次运行都产生完整可读 trace 的 Agent。
-
----
-
-# F9：Reproducible Runs
-
-**学习目标**：给定 trace 和配置，能复现或定位一次失败运行。
-
-**核心内容**
-- **复现三要素**：trace + config + seed（或至少 model/temperature）。
-- **确定性边界**：LLM 本身不完全确定，但 loop 路径、工具调用、失败点可以复现。
-- **回归测试**：把一次失败的 trace 变成测试用例，验证修复后不再出现同类失败。
-- **重放模式**：用旧 trace 替代真实模型调用，快速验证 Harness 行为。
-
-**动手练习**
-- 保存一次失败运行的完整 trace + config。
-- 实现 replay 模式：读取 trace，跳过模型调用，按记录推进 loop，验证 Harness 的拦截/恢复逻辑。
-- 写一个测试：给定某条失败 trace，Agent 必须在第 N 步触发降级。
-
-**产出物**：一次失败可被 trace 复现、修复可被测试验证的 Agent。
+**Deliverable**: An Agent that can self-recover from multiple types of errors.
+**Core Takeaway**: In Agent code, "making it work" is only 20%; "making it not crash when things go wrong" is 80% — this is Harness Engineering.
 
 ---
 
-# F10：Composable Agents
+# F5: Graceful Degradation
 
-**学习目标**：从单 Agent 升级到编排器——Harness Engineering 的进阶核心。
+**Learning Goal**: When the model or tools fail, the system degrades rather than crashes.
 
-**核心内容**
-- **何时需要多 Agent**：任务可并行分解、需要隔离上下文、或需要不同"角色"分工时。
-- **主-子（orchestrator-worker）模式**：主 Agent 拆分任务、派发给子 Agent、汇总结果。
-- **上下文隔离**：每个子 Agent 有独立的 context，避免互相污染——子 agent 也是一种 context 管理手段。
-- **A2A 协议**（Agent-to-Agent Protocol）：不同 Harness 之间的 Agent 如何互相发现能力、协商任务。Google 2025 年提出的开放标准，与 MCP 互补——MCP 解决 Agent↔工具，A2A 解决 Agent↔Agent。当你的 Agent 需要调用外部团队/服务提供的 Agent 时，A2A 定义了统一的握手、任务委派和状态同步方式。
-- **并行执行**：多个子 Agent 同时跑，如何收集与合并结果。
-- **子 Agent 的失败处理**：一个子 agent 失败不应拖垮整体。
-- 编排的代价：更复杂、更贵、更难 debug——什么时候不该用多 Agent。
+**Core Content**
+- **Degradation strategy pyramid**: full success → partial success → return approximate result → return safe fallback → graceful failure.
+- **Model-side degradation**: when the model refuses/rambles, retry with a simpler prompt, a smaller model, or a preset template.
+- **Tool-side degradation**: when a tool times out/exceptions, return "this tool is unavailable" and let the model find another path.
+- **Partial results are valuable**: in multi-step tasks, completed portions should be preserved, not all discarded.
+- **User-visible degradation**: when the Agent cannot complete, give a clear status explanation rather than a stack trace.
 
-**动手练习**
-- 实现一个主 Agent，能把任务拆成若干子任务，每个交给一个子 Agent。
-- 实现并行执行多个子 Agent 并汇总（例如：并行调研多个主题 / 并行排查多台设备）。
-- 复用 F8 的 trace，让编排器的每个子 agent 都可观测。
+**Hands-on Exercises**
+- Add a "degradation mode" switch to F4's Agent.
+- Simulate a tool being completely unavailable, observe whether the Agent can provide an alternative or partial result.
+- Design a "safe fallback response" for when the model repeatedly rambles.
 
-**产出物**：一个能并行派发子任务并汇总结果的编排器。
+**Deliverable**: An Agent that degrades rather than crashes in the face of failure.
 
 ---
 
-# F11：Config-Driven Behavior
+# F6: Least-Privilege Tooling
 
-**学习目标**：把模型、prompt、工具列表、安全策略外置到配置，让 Harness 行为可切换、可测试。
+**Learning Goal**: Let the Agent safely touch the real world. The security core of Harness.
 
-**核心内容**
-- **什么该进配置**：模型名、温度、max_tokens、system prompt、工具列表、安全策略、确认门阈值、降级策略。
-- **配置格式**：YAML/JSON/TOML，按环境拆分（dev / staging / prod）。
-- **动态重载**：不重启进程即可切换配置（可选，视场景而定）。
-- **A/B 测试**：用不同 config 跑同一批任务，对比完成率与成本。
-- **配置即契约**：配置变更应触发自动化测试，确保 loop 行为不变。
+**Core Content**
+- **Why it's needed**: Agents autonomously decide actions; a wrong write operation could delete data or change production configs.
+- **Tool allowlist**: which tools are callable, in what context they are callable.
+- **Sandbox execution**: run tools in an isolated environment (restricted filesystem, network isolation, read-only mode).
+- **Principle of least privilege**: read-only by default, write operations explicitly authorized — same mindset as firewall ACLs.
 
-**动手练习**
-- 把前面所有章节的硬编码参数（模型、prompt、工具列表、max_steps、权限策略）抽到一个 `config.yaml`。
-- 写两个配置：一个"激进模式"（自动确认低风险写操作）和一个"保守模式"（所有写操作都人工确认）。
-- 用同一任务分别跑两种配置，观察行为差异。
+**Hands-on Exercises**
+- Add a human confirmation gate to tools with side effects; only execute after confirmation.
+- Implement a "read-only mode" switch: when enabled, all write operations are directly intercepted by the Harness.
+- Write your Agent's "permission model": which operations auto-approve, which must confirm, which are permanently forbidden.
 
-**产出物**：一个行为完全由配置驱动的 Harness。
-
----
-
-# F12：Continuous Evaluation
-
-**学习目标**：Harness 的质量不应只看 demo 是否成功，而要用指标持续衡量。
-
-**核心内容**
-- **为什么需要**：demo 成功不代表可靠；要在大量任务上测量失败率、恢复率、成本。
-- **核心指标**：
-  - 任务完成率（task completion rate）
-  - 失败率（failure rate）
-  - 恢复率（recovery rate，失败后被 Harness 拉回来的比例）
-  - 平均步数 / token 数 / 延迟 / 成本
-  - 人工介入率（human-in-the-loop rate）
-- **评估数据集**：收集真实任务和已知失败 case，定期回归。
-- **评估 harness**：写一个 runner，批量跑任务，自动判断成功/失败，输出报表。
-- **评估工具生态（2026）**：
-  - **DeepEval**：pytest 兼容的 LLM 评估框架，60+ 指标，原生 CI/CD 集成。
-  - **AgentAssay**：针对非确定性 Agent 工作流的回归测试，用行为指纹检测 86% 的回归（传统二进制测试为 0%）。
-  - **promptfoo**：声明式 YAML 提示测试 + 红队测试，50+ 漏洞插件。
-  - **LLM-as-Judge**：2026 年行业标准，53.3% 的组织在使用（LangChain 调研数据）。
-- **从评估回推设计**：哪个 Factor 的指标差，就优先改进哪个 Factor。
-
-**动手练习**
-- 准备 10-20 个代表性任务（含简单、复杂、带陷阱的）。
-- 写一个 `evaluate.py`，批量运行并记录每个任务的完成状态、步数、token、是否触发人工确认。
-- 修改 Harness 后重新跑评估，看关键指标是否提升。
-
-**产出物**：一个能量化评估并持续改进的 Harness。
+**Deliverable**: An Agent where dangerous operations require human confirmation and defaults to least privilege.
 
 ---
 
-# 进阶：阅读真实 Harness
+# F7: Human-in-the-Loop Gates
 
-**学习目标**：带着前 12 章踩过的坑，去读成熟 Harness 的源码，把零散经验系统化。
+**Learning Goal**: Irreversible operations must pause for human confirmation, with suspend-resume support.
 
-**核心内容**
-- 推荐阅读对象（任选）：开源 Agent 运行时、Coding Agent 项目、或内部 Harness。
-- **2026 年值得精读的真实 Harness**：
-  - **Vercel AI SDK 6**：TypeScript 生态标杆，ToolLoopAgent + DevTools + MCP 完整支持，20M+ 月下载。
-  - **Mastra**：TypeScript 原生框架（22K+ stars），观察式记忆系统（Observer + Reflector Agent），企业级 RBAC。
-  - **Microsoft Agent Framework 1.0**：统一 Semantic Kernel + AutoGen，graph 编排 + middleware pipeline + DevUI 调试器。
-  - **OpenHands / SWE-agent**：开源 Coding Agent 运行时，看它们怎么在沙箱里安全执行代码。
-  - **Temporal.io + Agent 编排**：持久化 Agent 工作流，学习分布式系统的重试、状态机、活动监控如何应用于 Agent。
-- 带着具体问题读，而不是从头读到尾：
-  - 它怎么管理 context？（F3）
-  - 它怎么处理工具错误和死循环？（F4/F5）
-  - 它的权限/沙箱模型长什么样？（F6/F7）
-  - 它的 trace/events 怎么设计？（F8/F9）
-  - 它怎么做子 agent / 编排？（F10）
-  - 它的配置与评估长什么样？（F11/F12）
+**Core Content**
+- **Confirmation gate state machine**: running → suspended awaiting confirmation → resumed execution → completed.
+- **Recoverable state**: when suspended, save full context and trace; a person can leave and resume later.
+- **Batch confirmation vs single confirmation**: different risk levels use different strategies.
+- **Timeout and default behavior**: what to do when the human doesn't respond for too long (cancel / use default safe option).
+- **Audit log**: who, at what time, confirmed what operation.
 
-**动手练习**
-- 选一个真实 Harness，针对上面 6 个问题各写一段精读笔记。
-- 挑一个你觉得它做得比你好的设计，移植到你自己的 Agent 里。
+**Hands-on Exercises**
+- On top of F6, make "confirmation" an explicit state inside the loop, rather than a simple print inside the tool.
+- Implement suspend-resume: after program exit, reload state and continue execution.
+- Add timeout strategy and audit events to the confirmation gate.
 
-**产出物**：一份源码精读笔记，外加至少一处对自己 Agent 的改进。
+**Deliverable**: An Agent with a recoverable human confirmation gate.
 
 ---
 
-# 结课项目：一个完整的领域 Agent
+# F8: Observable by Default
 
-把所有 Factor 综合成一个真正解决问题的 Agent。建议选一个你自己领域的真实任务：
+**Learning Goal**: Without trace, you cannot debug the Agent. Make every step of the Agent visible, replayable.
 
-- **运维/网络方向**：一个能并行排查多台设备的诊断 Agent（每台一个子 agent，主 agent 汇总），写操作必须人工确认，全程有 trace。
-- **数据方向**：一个能自主查询、清洗、出报告的数据分析 Agent。
-- **开发方向**：一个能读代码库、定位 bug、提出修复的 Coding Agent。
+**Core Content**
+- **Why it's essential**: Agents are non-deterministic; the same input may take different paths. When things go wrong you need to know "what it was thinking, what it called, what it saw at the time." The Agent equivalent of packet capture.
+- **Event model**: emit every step of the loop as a structured event (start thinking / decide to call tool / tool returns / error / complete).
+- **Structured logging**: record each step's input/output, token consumption, time spent.
+- **Replay and debugging**: how to reproduce an Agent run using the recorded trace.
+- Cost and latency observability: how many tokens, how much money, how much time per task.
 
-## 结课项目检查清单（12-Factor 成熟度自评）
+**Hands-on Exercises**
+- Add an event emission layer to the Agent loop, writing each step as structured logs (JSON lines).
+- Write a simple viewer that prints a run's trace as a readable timeline.
+- Use the trace to debug a previously drifting task, pinpointing which step went wrong.
 
-- [ ] **F1** 手写的 agent loop（不依赖重型框架）
-- [ ] **F2** 一套有校验、错误能优雅返回的工具
-- [ ] **F3** context 管理策略，长任务不崩
-- [ ] **F4** 失败恢复：能处理工具错误、死循环、限流
-- [ ] **F5** 降级策略：模型/工具失败时不崩溃
-- [ ] **F6** 权限模型：危险操作有人工确认门，默认最小权限
-- [ ] **F7** 人工确认门可挂起-恢复
-- [ ] **F8** 完整 trace：每次运行可回放、可 debug
-- [ ] **F9** 失败运行可被复现/回归测试
-- [ ] **F10** （进阶）多 agent 编排
-- [ ] **F11** 关键行为由配置驱动
-- [ ] **F12** 有量化评估指标与测试集
+**Deliverable**: An Agent that produces a complete readable trace on every run.
 
 ---
 
-## 给学习者的最后三句话
+# F9: Reproducible Runs
 
-1. **先让它工作，再让它可靠，最后才让它复杂**——别一上来就上多 Agent。
-2. **每一个 Harness 特性，都是某个失败模式逼出来的**——先制造失败，你才知道为什么需要它。
-3. **把模型当不可靠节点，把自己当给它做容错的工程师**——这是这门课唯一真正重要的心智模型。
+**Learning Goal**: Given a trace and configuration, reproduce or locate a failed run.
+
+**Core Content**
+- **Three elements of reproduction**: trace + config + seed (or at least model/temperature).
+- **Determinism boundaries**: the LLM itself is not fully deterministic, but loop paths, tool calls, and failure points can be reproduced.
+- **Regression testing**: turn a failed trace into a test case, verifying that after a fix the same class of failure no longer occurs.
+- **Replay mode**: use an old trace to replace real model calls, quickly verifying Harness behavior.
+
+**Hands-on Exercises**
+- Save the complete trace + config of a failed run.
+- Implement replay mode: read the trace, skip model calls, advance the loop according to the record, verifying Harness interception/recovery logic.
+- Write a test: given a certain failed trace, the Agent must trigger degradation at step N.
+
+**Deliverable**: An Agent where failures can be reproduced from trace and fixes can be tested.
 
 ---
 
-# 附录：课程网站实现方案
+# F10: Composable Agents
 
-本课程以静态网站形式呈现，GitHub Pages / Cloudflare Pages 直接托管，不需要构建步骤。
+**Learning Goal**: Upgrade from a single Agent to an orchestrator — the advanced core of Harness Engineering.
 
-## 技术选型
+**Core Content**
+- **When multiple Agents are needed**: when tasks can be decomposed in parallel, when context isolation is needed, or when different "roles" are needed for division of labor.
+- **Master-sub (orchestrator-worker) pattern**: the master Agent splits tasks, dispatches to sub-Agents, and aggregates results.
+- **Context isolation**: each sub-Agent has its own independent context, preventing mutual contamination — sub-agents are also a form of context management.
+- **A2A Protocol** (Agent-to-Agent Protocol): how Agents across different Harnesses discover capabilities, negotiate tasks. Google's open standard proposed in 2025, complementary to MCP — MCP solves Agent↔tool, A2A solves Agent↔Agent. When your Agent needs to call an Agent provided by an external team/service, A2A defines unified handshake, task delegation, and state synchronization.
+- **Parallel execution**: multiple sub-Agents run simultaneously; how to collect and merge results.
+- **Sub-Agent failure handling**: one sub-agent failing should not bring down the whole.
+- Cost of orchestration: more complex, more expensive, harder to debug — when not to use multi-Agent.
 
-| 维度 | 方案 | 理由 |
+**Hands-on Exercises**
+- Implement a master Agent that can split a task into sub-tasks, each delegated to a sub-Agent.
+- Implement parallel execution of multiple sub-Agents and aggregate results (e.g. parallel research on multiple topics / parallel diagnosis of multiple devices).
+- Reuse F8's trace so that every sub-agent of the orchestrator is observable.
+
+**Deliverable**: An orchestrator that can dispatch sub-tasks in parallel and aggregate results.
+
+---
+
+# F11: Config-Driven Behavior
+
+**Learning Goal**: Externalize model, prompt, tool list, and security policy to configuration; make Harness behavior switchable and testable.
+
+**Core Content**
+- **What belongs in config**: model name, temperature, max_tokens, system prompt, tool list, security policy, confirmation gate threshold, degradation strategy.
+- **Config format**: YAML/JSON/TOML, split by environment (dev / staging / prod).
+- **Dynamic reload**: switch config without restarting the process (optional, depending on scenario).
+- **A/B testing**: run the same batch of tasks with different configs, comparing completion rate and cost.
+- **Config as contract**: config changes should trigger automated tests, ensuring loop behavior remains unchanged.
+
+**Hands-on Exercises**
+- Extract all hardcoded parameters from previous chapters (model, prompt, tool list, max_steps, permission policy) into a `config.yaml`.
+- Write two configs: an "aggressive mode" (auto-confirm low-risk writes) and a "conservative mode" (all writes require human confirmation).
+- Run the same task with both configs, observe behavioral differences.
+
+**Deliverable**: A Harness whose behavior is fully driven by configuration.
+
+---
+
+# F12: Continuous Evaluation
+
+**Learning Goal**: Harness quality should not be judged by whether the demo works, but measured continuously with metrics.
+
+**Core Content**
+- **Why it's needed**: a successful demo doesn't mean reliability; failure rate, recovery rate, and cost must be measured over many tasks.
+- **Core metrics**:
+  - Task completion rate
+  - Failure rate
+  - Recovery rate (proportion pulled back by Harness after failure)
+  - Average steps / tokens / latency / cost
+  - Human-in-the-loop rate
+- **Evaluation dataset**: collect real tasks and known failure cases for periodic regression.
+- **Evaluation harness**: write a runner that batch-runs tasks, automatically judges success/failure, and outputs a report.
+- **Evaluation tool ecosystem (2026)**:
+  - **DeepEval**: pytest-compatible LLM evaluation framework, 60+ metrics, native CI/CD integration.
+  - **AgentAssay**: regression testing for non-deterministic Agent workflows, using behavioral fingerprints to detect 86% of regressions (traditional binary testing: 0%).
+  - **promptfoo**: declarative YAML prompt testing + red-teaming, 50+ vulnerability plugins.
+  - **LLM-as-Judge**: 2026 industry standard, 53.3% of organizations in use (LangChain survey data).
+- **Designing from evaluation backwards**: whichever Factor's metrics are poor, prioritize improving that Factor.
+
+**Hands-on Exercises**
+- Prepare 10-20 representative tasks (including simple, complex, and trap cases).
+- Write an `evaluate.py` that batch-runs and records each task's completion status, step count, tokens, and whether human confirmation was triggered.
+- After modifying the Harness, rerun evaluation and see if key metrics improved.
+
+**Deliverable**: A Harness that can be quantitatively evaluated and continuously improved.
+
+---
+
+# Advanced: Reading Real Harnesses
+
+**Learning Goal**: With the pitfalls of the first 12 chapters in mind, read mature Harness source code and systematize scattered experience.
+
+**Core Content**
+- Recommended reading targets (pick one): open-source Agent runtimes, Coding Agent projects, or internal Harnesses.
+- **Real Harnesses Worth Deep-Reading in 2026**:
+  - **Vercel AI SDK 6**: TypeScript ecosystem benchmark, ToolLoopAgent + DevTools + full MCP support, 20M+ monthly downloads.
+  - **Mastra**: TypeScript-native framework (22K+ stars), observational memory system (Observer + Reflector Agent), enterprise-grade RBAC.
+  - **Microsoft Agent Framework 1.0**: unified Semantic Kernel + AutoGen, graph orchestration + middleware pipeline + DevUI debugger.
+  - **OpenHands / SWE-agent**: open-source Coding Agent runtimes, see how they safely execute code in sandboxes.
+  - **Temporal.io + Agent Orchestration**: persistent Agent workflows, learn how distributed system retry, state machines, and activity monitoring apply to Agents.
+- Read with specific questions, not from beginning to end:
+  - How does it manage context? (F3)
+  - How does it handle tool errors and infinite loops? (F4/F5)
+  - What does its permission/sandbox model look like? (F6/F7)
+  - How is its trace/events designed? (F8/F9)
+  - How does it do sub-agent / orchestration? (F10)
+  - What do its config and evaluation look like? (F11/F12)
+
+**Hands-on Exercises**
+- Pick a real Harness and write a deep-reading note for each of the 6 questions above.
+- Pick one design you think it does better than yours, and port it into your own Agent.
+
+**Deliverable**: A source-code deep-reading note, plus at least one improvement to your own Agent.
+
+---
+
+# Capstone Project: A Complete Domain Agent
+
+Combine all Factors into a truly problem-solving Agent. Pick a real task from your own domain:
+
+- **Operations / Network direction**: A diagnostic Agent that can diagnose multiple devices in parallel (one sub-agent per device, master agent aggregates), write operations require human confirmation, full trace throughout.
+- **Data direction**: A data analysis Agent that can autonomously query, clean, and generate reports.
+- **Development direction**: A Coding Agent that can read a codebase, locate bugs, and propose fixes.
+
+## Capstone Project Checklist (12-Factor Maturity Self-Assessment)
+
+- [ ] **F1** Handwritten agent loop (not relying on heavy frameworks)
+- [ ] **F2** A set of tools with validation and graceful error returns
+- [ ] **F3** Context management strategy, long tasks don't crash
+- [ ] **F4** Failure recovery: can handle tool errors, infinite loops, rate limits
+- [ ] **F5** Degradation strategy: doesn't crash when model/tool fails
+- [ ] **F6** Permission model: dangerous operations require confirmation, defaults to least privilege
+- [ ] **F7** Human confirmation gate with suspend-resume
+- [ ] **F8** Complete trace: every run is replayable and debuggable
+- [ ] **F9** Failed runs can be reproduced / regression tested
+- [ ] **F10** (Advanced) Multi-agent orchestration
+- [ ] **F11** Key behavior driven by configuration
+- [ ] **F12** Quantitative evaluation metrics and test suite
+
+---
+
+## Three Final Words to Learners
+
+1. **Make it work first, then make it reliable, and only then make it complex** — don't jump straight to multi-Agent.
+2. **Every Harness feature is born from some failure mode forcing it** — first manufacture failure, and you'll know why it's needed.
+3. **Treat the model as an unreliable node, and yourself as the engineer building resilience around it** — this is the only truly important mental model of this course.
+
+---
+
+# Appendix: Course Website Implementation Plan
+
+This course is presented as a static website, directly hosted on GitHub Pages / Cloudflare Pages, with no build step required.
+
+## Technology Choices
+
+| Dimension | Solution | Rationale |
 |---|---|---|
-| 构建方式 | **单文件 HTML**（CSS/JS 内联） | 零依赖、零构建，拖进浏览器就能看 |
-| 样式 | 纯 CSS，不引外部框架 | 减少加载、避免 CDN 依赖 |
-| 字体 | 系统字体栈 | `system-ui, -apple-system, sans-serif`，中文回退 `"PingFang SC", "Microsoft YaHei"` |
-| 代码高亮 | 暂不做 | 后续补充代码示例时可按需加 highlight.js |
-| 部署 | Cloudflare Pages（默认）+ GitHub Pages（备选） | 推送即上线 |
+| Build method | **Single-file HTML** (CSS/JS inline) | Zero dependencies, zero build, drag into browser and it works |
+| Styling | Pure CSS, no external frameworks | Reduce loading, avoid CDN dependency |
+| Fonts | System font stack | `system-ui, -apple-system, sans-serif`, Chinese fallback `"PingFang SC", "Microsoft YaHei"` |
+| Code highlighting | Not for now | Add highlight.js later when code examples are expanded |
+| Deployment | Cloudflare Pages (default) + GitHub Pages (fallback) | Push and it's live |
 
-## 页面布局
+## Page Layout
 
 ```text
 ┌──────────────────────────────────────────────────┐
-│  顶栏：课程标题 + GitHub 链接 + 暗色模式切换      │
+│  Top bar: course title + GitHub link + dark mode toggle      │
 ├────────────┬─────────────────────────────────────┤
-│  侧边导航   │  主内容区（滚动显示各 Factor）        │
-│  前置       │                                     │
+│  Sidebar    │  Main content area (scroll through each Factor)        │
+│  Prerequisite       │                                     │
 │  F1-F12    │                                     │
-│  进阶/结课   │                                     │
+│  Advanced/Capstone   │                                     │
 ├────────────┴─────────────────────────────────────┤
-│  页脚：开源协议 / 贡献指引                         │
+│  Footer: open source license / contribution guide                         │
 └──────────────────────────────────────────────────┘
 ```
 
-- **侧边栏**：240px 固定定位，滚动时不动
-- **内容区**：最大宽度 780px 居中
-- **移动端**（<768px）：侧边栏折叠为汉堡菜单，内容区全宽
+- **Sidebar**: 240px fixed position, doesn't move when scrolling
+- **Content area**: max-width 780px centered
+- **Mobile** (<768px): sidebar collapses to hamburger menu, content area full width
 
-## 每个 Factor 的 HTML 结构
+## HTML Structure for Each Factor
 
 ```html
 <section id="factor-N">
-  <h2>Factor N：标题</h2>
-  <div class="goal-card">学习目标</div>
-  <div class="content">核心内容（正文 + 列表 / 表格）</div>
-  <div class="exercises">动手练习（带序号的卡片）</div>
-  <div class="output-card">产出物（高亮块）</div>
+  <h2>Factor N: Title</h2>
+  <div class="goal-card">Learning Goal</div>
+  <div class="content">Core content (body text + lists / tables)</div>
+  <div class="exercises">Hands-on exercises (numbered cards)</div>
+  <div class="output-card">Deliverable (highlighted block)</div>
 </section>
 ```
 
-## 视觉设计
+## Visual Design
 
-**配色**（亮/暗双模式）：
+**Color scheme** (light/dark dual mode):
 
-| 元素 | 亮色 | 暗色 |
+| Element | Light | Dark |
 |---|---|---|
-| 背景 | `#ffffff` | `#1a1a2e` |
-| 正文 | `#2d2d2d` | `#e0e0e0` |
-| 侧边栏 | `#f7f7f8` | `#16213e` |
-| 强调色 | `#2563eb` | `#60a5fa` |
-| 卡片背景 | `#f0f4ff` | `#1e2a4a` |
-| 关键标记（★） | `#ef4444` | `#f87171` |
+| Background | `#ffffff` | `#1a1a2e` |
+| Body text | `#2d2d2d` | `#e0e0e0` |
+| Sidebar | `#f7f7f8` | `#16213e` |
+| Accent | `#2563eb` | `#60a5fa` |
+| Card background | `#f0f4ff` | `#1e2a4a` |
+| Key marker (★) | `#ef4444` | `#f87171` |
 
-**排版**：h1 2rem / h2 1.6rem / h3 1.25rem / 正文 1rem 行高 1.75。Factor 之间 4rem 间距。
+**Typography**: h1 2rem / h2 1.6rem / h3 1.25rem / body 1rem line-height 1.75. 4rem spacing between Factors.
 
-**特殊元素**：
-- 核心引用块：大字号，左侧蓝色竖线
-- 学习目标：浅蓝底色卡片
-- 动手练习：带序号卡片，浅灰底
-- 产出物：绿色左边线装饰块
+**Special elements**:
+- Core quote block: large font, left blue vertical line
+- Learning goal: light blue background card
+- Hands-on exercises: numbered cards, light gray background
+- Deliverable: green left-border decorative block
 
-## 交互功能
+## Interactive Features
 
-| 功能 | 实现 | 优先级 |
+| Feature | Implementation | Priority |
 |---|---|---|
-| 侧边栏跳转 | 锚点 + `scroll-behavior: smooth` | 必须 |
-| 当前 Factor 高亮 | `IntersectionObserver` 动态加 `.active` | 必须 |
-| 暗色模式 | CSS 变量 + `localStorage` 记忆 | 必须 |
-| 移动端菜单 | 汉堡按钮展开覆盖层 | 必须 |
-| 进度追踪 | `localStorage` 存勾选状态 | 可选 |
-| 搜索 | 不做，单页 Ctrl+F 够用 | 不做 |
+| Sidebar navigation | Anchor + `scroll-behavior: smooth` | Required |
+| Current Factor highlight | `IntersectionObserver` dynamically adds `.active` | Required |
+| Dark mode | CSS variables + `localStorage` memory | Required |
+| Mobile menu | Hamburger button expands overlay | Required |
+| Progress tracking | `localStorage` saves check state | Optional |
+| Search | Skip, single-page Ctrl+F is enough | Skip |
 
-## 内容适配映射
+## Content Adaptation Mapping
 
-| Markdown 元素 | 网页呈现 |
+| Markdown Element | Web Presentation |
 |---|---|
-| `# Factor N：标题` | `<section id="factor-N"><h2>` |
-| `**学习目标**` | 目标卡片组件 |
-| `**核心内容**` + 列表 | 正文 + `<ul>` |
-| `**动手练习**` + 列表 | 练习卡片（带序号） |
-| `**产出物**` | 产出物高亮块 |
-| `> 引用` | 引用块（大字号、蓝色竖线） |
-| 表格 | `<table>` 简洁横线风格 |
+| `# Factor N: Title` | `<section id="factor-N"><h2>` |
+| `**Learning Goal**` | Goal card component |
+| `**Core Content**` + list | Body text + `<ul>` |
+| `**Hands-on Exercises**` + list | Exercise cards (numbered) |
+| `**Deliverable**` | Deliverable highlighted block |
+| `> Quote` | Quote block (large font, blue vertical line) |
+| Table | `<table>` clean horizontal-line style |
 
-## 仓库结构
+## Repository Structure
 
 ```text
 agent-harness-course/
-├── index.html                # 唯一页面文件（CSS/JS 内联）
-├── agent-harness-course.md   # 课程原始 Markdown（供贡献者编辑）
-├── GLOSSARY.md               # 术语表
-├── README.md                 # 仓库说明 + 在线访问地址 + 贡献指南
-└── examples/                 # 按 Factor 的骨架代码和参考实现
+├── index.html                # Only page file (CSS/JS inline)
+├── agent-harness-course.md   # Course original Markdown (for contributors to edit)
+├── GLOSSARY.md               # Glossary
+├── README.md                 # Repo description + online access URL + contribution guide
+└── examples/                 # Skeleton code and reference implementations by Factor
 ```
 
-每个 Factor 目录建议包含：`README.md`（讲义）、`starter/`（骨架代码）、`solution/`（参考实现）、`exercises.md`（练习）。
+Each Factor directory should contain: `README.md` (lecture notes), `starter/` (skeleton code), `solution/` (reference implementation), `exercises.md` (exercises).
 
-## 后续扩展方向
+## Future Expansion Directions
 
-- ✅ 以 12-Factor 为主线重组课程结构
-- ✅ 每个 Factor 加骨架代码和参考实现（见 `examples/`）
-- ✅ 统一术语表（见 `GLOSSARY.md`）
-- 加架构图 / 流程图（Agent loop 状态机图、Harness 分层图、12-Factor 关系图）
-- 内容膨胀后迁移到 VitePress（Markdown 驱动，迁移成本低）
-- 多语言支持（英文版）
+- ✅ Restructure course around 12-Factor
+- ✅ Add skeleton code and reference implementations for each Factor (see `examples/`)
+- ✅ Unified glossary (see `GLOSSARY.md`)
+- Add architecture diagrams / flowcharts (Agent loop state machine diagram, Harness layering diagram, 12-Factor relationship diagram)
+- Migrate to VitePress after content bloat (Markdown-driven, low migration cost)
+- Multilingual support (English version)
 
 ---
 
-# 附录：2026 Harness 生态速览
+# Appendix: 2026 Harness Ecosystem Overview
 
-> 本附录记录 2025-2026 年 Agent / Harness 领域的关键协议、框架和标准，供学习者在完成课程后快速了解业界全貌。
+> This appendix records key protocols, frameworks, and standards in the Agent / Harness domain from 2025-2026, for learners to quickly understand the industry landscape after completing the course.
 
-## 协议层
+## Protocol Layer
 
-| 协议 | 发起方 | 解决的问题 | 与本课程关联 |
+| Protocol | Initiator | Problem Solved | Course Correlation |
 |---|---|---|---|
-| **MCP** (Model Context Protocol) | Anthropic (2024) | 标准化 Agent 与外部工具/数据源的上下文交换 | F2（工具契约）、F6（权限） |
-| **A2A** (Agent-to-Agent) | Google (2025) | 不同 Agent 之间的能力发现与任务协作 | F10（Composable Agents） |
-| **AGENTS.md** | Anthropic → 社区标准 | 向编码 Agent 描述项目规范与安全约束 | F11（配置驱动） |
-| **SKILL.md** | Anthropic → 社区标准 | Agent Skill 包的标准格式 | F10-F12 |
+| **MCP** (Model Context Protocol) | Anthropic (2024) | Standardize context exchange between Agent and external tools/data sources | F2 (Tool Contract), F6 (Permissions) |
+| **A2A** (Agent-to-Agent) | Google (2025) | Capability discovery and task collaboration between different Agents | F10 (Composable Agents) |
+| **AGENTS.md** | Anthropic → Community Standard | Describe project specs and safety constraints to coding Agents | F11 (Config-Driven) |
+| **SKILL.md** | Anthropic → Community Standard | Standard format for Agent Skill packages | F10-F12 |
 
-## 框架层（2026 年主流）
+## Framework Layer (2026 Mainstream)
 
-| 框架 | 语言 | 核心特点 | 适用场景 |
+| Framework | Language | Core Features | Use Case |
 |---|---|---|---|
-| **Vercel AI SDK 6** | TypeScript | 20M+ 月下载，ToolLoopAgent、DevTools、MCP 完整支持 | Web / 全栈 TS 项目 |
-| **Mastra** | TypeScript | 22K+ stars，观察式记忆、企业 RBAC、远程沙箱 | 需要复杂记忆的企业级应用 |
-| **Microsoft Agent Framework 1.0** | Python / .NET | 统一 Semantic Kernel + AutoGen，graph 编排，DevUI | 微软生态 / 企业 .NET |
-| **OpenAI Agents SDK** | Python | 原生沙箱执行、可配置记忆、MCP 支持 | OpenAI 模型优先 |
-| **LangGraph** | Python / JS | 图结构编排，状态机显式化 | 复杂工作流 |
-| **Temporal + Agent** | 多语言 | 持久化 Agent 工作流，分布式系统级可靠性 | 长时运行任务 |
+| **Vercel AI SDK 6** | TypeScript | 20M+ monthly downloads, ToolLoopAgent, DevTools, full MCP support | Web / full-stack TS projects |
+| **Mastra** | TypeScript | 22K+ stars, observational memory, enterprise RBAC, remote sandbox | Enterprise apps needing complex memory |
+| **Microsoft Agent Framework 1.0** | Python / .NET | Unified Semantic Kernel + AutoGen, graph orchestration, middleware pipeline, DevUI | Microsoft ecosystem / enterprise .NET |
+| **OpenAI Agents SDK** | Python | Native sandbox execution, configurable memory, MCP support | OpenAI model priority |
+| **LangGraph** | Python / JS | Graph-structure orchestration, explicit state machines | Complex workflows |
+| **Temporal + Agent** | Multi-language | Persistent Agent workflows, distributed-system-level reliability | Long-running tasks |
 
-## 评估工具
+## Evaluation Tools
 
-| 工具 | 用途 | 与本课程关联 |
+| Tool | Purpose | Course Correlation |
 |---|---|---|
-| **DeepEval** | pytest 兼容的 LLM 评估框架，60+ 指标 | F12 |
-| **AgentAssay** | 非确定性 Agent 回归测试，行为指纹 | F9/F12 |
-| **promptfoo** | 声明式提示测试 + 红队扫描 | F2/F12 |
-| **RAGAS** | RAG / Agent 质量评估 | F12 |
+| **DeepEval** | pytest-compatible LLM evaluation framework, 60+ metrics | F12 |
+| **AgentAssay** | Non-deterministic Agent regression testing, behavioral fingerprints | F9/F12 |
+| **promptfoo** | Declarative prompt testing + red-teaming, 50+ vulnerability plugins | F2/F12 |
+| **RAGAS** | RAG / Agent quality evaluation | F12 |
 
-## 值得关注的企业实践
+## Notable Enterprise Practices
 
-- **Shopify Roast**：Ruby DSL 结构化 AI 工作流，"非确定性是可靠性的敌人"——用确定性步骤（shell、代码）与 Agent 步骤交错，版本可控。
-- **Anthropic Claude Code 质量报告**：展示微小 Harness 调整（prompt 措辞、缓存头、默认参数）如何复合成可见的 Agent 退化。
-- **Red Hat 四支柱模型**：vibes → specs → skills → agents，从结构化上下文到 MCP 集成，从人类-Agent 协作视角定义 Harness。
+- **Shopify Roast**: Ruby DSL structured AI workflows, "non-determinism is the enemy of reliability" — interleaving deterministic steps (shell, code) with Agent steps, version-controllable.
+- **Anthropic Claude Code Quality Report**: Demonstrates how tiny Harness adjustments (prompt wording, cache headers, default parameters) compound into visible Agent degradation.
+- **Red Hat Four-Pillar Model**: vibes → specs → skills → agents, from structured context to MCP integration, defining Harness from a human-Agent collaboration perspective.
 
-## 2026 年关键趋势
+## 2026 Key Trends
 
-1. **协议标准化**：MCP + A2A 正在统一 Agent 生态的"插口"，框架层不再各自造轮子。
-2. **评估即基础设施**：从"demo 能跑"到"CI 能通过"，Agent 评估成为上线门槛。
-3. **记忆系统分化**：短期 context（F3）vs 长期结构化记忆（Mastra Observer/Reflector）vs 检索增强（RAG）。
-4. **CodeAct 执行模式**：Agent 生成 Python 程序一次性调用多工具，比逐轮 tool call 减少 52% 延迟和 64% token。
-5. **Harness 即产品**：工程师的价值从写代码转向设计约束环境——"环境优先工程"。
+1. **Protocol Standardization**: MCP + A2A are unifying the "plugs" of the Agent ecosystem; the framework layer is no longer reinventing wheels individually.
+2. **Evaluation as Infrastructure**: From "demo works" to "CI passes," Agent evaluation becomes a production gate.
+3. **Memory System Divergence**: Short-term context (F3) vs long-term structured memory (Mastra Observer/Reflector) vs retrieval augmentation (RAG).
+4. **CodeAct Execution Mode**: Agent generates Python programs to call multiple tools in one shot, reducing 52% latency and 64% tokens compared to per-round tool calls.
+5. **Harness as Product**: Engineer value shifts from writing code to designing constraint environments — "environment-first engineering."
 
 ---
 
-*本课程为开源学习材料，欢迎在 GitHub 上 fork、改编、补充。*
+*This course is open-source learning material. Welcome to fork, adapt, and extend on GitHub.*

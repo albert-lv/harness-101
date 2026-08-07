@@ -1,13 +1,13 @@
-# Factor 5：Graceful Degradation
+# Factor 5: Graceful Degradation
 
-## 运行方式
+## How to Run
 
 ```bash
 export ANTHROPIC_API_KEY=your_key
 python solution/degradation.py
 ```
 
-## 文件
+## Files
 
-- `starter/degradation.py`：骨架代码，留有 TODO。
-- `solution/degradation.py`：展示降级策略与兜底回复的参考实现。
+- `starter/degradation.py`: Skeleton code with TODOs.
+- `solution/degradation.py`: Reference implementation demonstrating degradation strategies and fallback responses.

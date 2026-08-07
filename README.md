@@ -3,13 +3,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub Pages](https://img.shields.io/badge/deployed-GitHub%20Pages-blue.svg)](https://albert-lv.github.io/harness-101)
 
-《从零构建 AI Agent 与 Harness Engineering 实战课程》静态课程站点。
+Static course site for **"Build AI Agents and Harness Engineering from Scratch"**.
 
-> **English**: This is the static course site for "Build AI Agents and Harness Engineering from Scratch" (Chinese).
+> This course is organized around the **Harness 12-Factor** methodology: Preparations → F1-F12 → Advanced Reading → Capstone Project. Each chapter provides skeleton code (`starter/`) and reference implementations (`solution/`), refining a "working Agent" into a "production-ready Harness".
 
-本课程以 **Harness 12-Factor** 为主线组织：前置 → F1-F12 → 进阶阅读 → 结课项目。每章提供骨架代码（`starter/`）与参考实现（`solution/`），把“能跑的 Agent”打磨成“可上线 Harness”。
-
-## 📚 Course Contents
+## Course Contents
 
 A hands-on course covering:
 
@@ -31,7 +29,7 @@ A hands-on course covering:
 - Tool use, planning, memory, sandboxing, and evaluation
 - Building production-ready agent workflows
 
-## 🚀 Quick Start
+## Quick Start
 
 No build step required. Open the course directly:
 
@@ -50,19 +48,19 @@ python -m http.server 8000
 # Visit http://localhost:8000
 ```
 
-## 🌐 Deploy
+## Deploy
 
-### Cloudflare Pages（默认）
+### Cloudflare Pages (Default)
 
-本项目通过 `wrangler.jsonc` 部署到 Cloudflare Pages：
+Deploy to Cloudflare Pages via `wrangler.jsonc`:
 
 ```bash
 npx wrangler pages deploy .
 ```
 
-访问：<https://harness-101.pages.dev/>
+Visit: <https://harness-101.pages.dev/>
 
-### GitHub Pages（备选）
+### GitHub Pages (Alternative)
 
 1. Push the `main` branch to GitHub.
 2. Go to **Settings → Pages**.
@@ -70,14 +68,14 @@ npx wrangler pages deploy .
 4. Choose `main` and root `/`.
 5. Visit `https://<username>.github.io/harness-101/`.
 
-## 🏗️ Repository Structure
+## Repository Structure
 
 ```
 ├── index.html                 # Single-file course website (CSS/JS inlined)
 ├── agent-harness-course.md    # Course Markdown source (single source of truth)
 ├── GLOSSARY.md                # Consistent terminology for contributors
 ├── examples/                  # Per-Factor starter code and reference solutions
-│   ├── prep/                  # 前置：环境与第一次 API 调用
+│   ├── prep/                  # Prep: Environment & first API call
 │   ├── factor-1/              # Single Agent Loop
 │   ├── factor-2/              # Explicit Tool Contract
 │   ├── factor-3/              # Context Budgeting
@@ -98,7 +96,7 @@ npx wrangler pages deploy .
 └── CONTRIBUTING.md            # Contribution guidelines
 ```
 
-## ✏️ Contributing
+## Contributing
 
 Content changes should be made in `agent-harness-course.md` first, then synchronized to `index.html`.
 
@@ -106,10 +104,10 @@ For typo fixes, content corrections, or translation proposals, please open an [I
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-## 📄 License
+## License
 
 This project is licensed under the [MIT License](LICENSE).
 
-## 🔗 Keywords
+## Keywords
 
-`ai-agent` `agent-engineering` `harness-engineering` `llm` `prompt-engineering` `tool-use` `rag` `course` `education` `chinese` `github-pages`
+`ai-agent` `agent-engineering` `harness-engineering` `llm` `prompt-engineering` `tool-use` `rag` `course` `education` `github-pages`

@@ -1,14 +1,14 @@
-# 动手代码示例
+# Hands-On Code Examples
 
-本目录按 **Harness 12-Factor** 组织，每章提供可运行的骨架代码（`starter/`）与参考实现（`solution/`）。
+This directory is organized by **Harness 12-Factor**. Each chapter provides runnable skeleton code (`starter/`) and reference implementations (`solution/`).
 
-> **学习建议**：先根据课程讲义自己实现，跑不通或想对比时再来看 `solution/`。
+> **Learning Tip**: Try to implement it yourself based on the course lectures first. Check `solution/` only when you're stuck or want to compare.
 
-## 目录结构
+## Directory Structure
 
 ```text
 examples/
-├── prep/                  # 前置：环境与第一次 API 调用
+├── prep/                  # Prep: Environment & first API call
 ├── factor-1/              # Single Agent Loop
 ├── factor-2/              # Explicit Tool Contract
 ├── factor-3/              # Context Budgeting
@@ -23,25 +23,25 @@ examples/
 └── factor-12/             # Continuous Evaluation
 ```
 
-每个 Factor 目录建议包含：
+Each Factor directory should ideally contain:
 
-- `README.md` — 该 Factor 代码的说明与运行方式
-- `starter/` — 骨架代码，留有 TODO 供你填补
-- `solution/` — 参考实现
-- `exercises.md` — 针对代码的额外练习
+- `README.md` — Instructions and how to run the code for this Factor
+- `starter/` — Skeleton code with TODOs for you to fill in
+- `solution/` — Reference implementation
+- `exercises.md` — Additional exercises for the code
 
-## 快速开始
+## Quick Start
 
 ```bash
-# 进入任意 Factor
+# Enter any Factor
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 python starter/xxx.py
 ```
 
-## 贡献代码示例
+## Contributing Code Examples
 
-1. 保持示例与课程讲义一致。
-2. 优先使用标准库 + `anthropic`（或兼容 OpenAI API 的库），避免引入框架。
-3. 在 `README.md` 中说明运行所需的环境变量（如 `ANTHROPIC_API_KEY`）。
+1. Keep examples consistent with the course lectures.
+2. Prioritize standard library + `anthropic` (or OpenAI API-compatible library), avoid introducing frameworks.
+3. Document required environment variables (e.g. `ANTHROPIC_API_KEY`) in `README.md`.

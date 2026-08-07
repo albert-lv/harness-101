@@ -1,14 +1,14 @@
-# Factor 9：Reproducible Runs
+# Factor 9: Reproducible Runs
 
-## 运行方式
+## How to Run
 
 ```bash
 python solution/replay.py
 ```
 
-> 本 Factor 展示如何用 trace + config 复现一次运行。
+> This Factor demonstrates how to reproduce a run using trace + config.
 
-## 文件
+## Files
 
-- `starter/replay.py`：骨架代码，留有 TODO。
-- `solution/replay.py`：trace replay 与回归测试参考实现。
+- `starter/replay.py`: Skeleton code with TODOs.
+- `solution/replay.py`: Reference implementation of trace replay and regression testing.

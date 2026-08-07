@@ -1,30 +1,30 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>从零构建 AI Agent 与 Harness Engineering 实战课程</title>
-  <meta name="description" content="面向工程师的 AI Agent 与 Harness Engineering 实战课程：以 Harness 12-Factor 为主线，手写 Agent Loop、工具契约、Context 管理、容错、权限沙箱、可观测性、多 Agent 编排与持续评估。" />
-  <meta name="keywords" content="AI Agent, Harness Engineering, LLM, 工具调用, 可观测性, 多 Agent 编排, 沙箱, 人工确认门, 12-Factor, Config-Driven, Continuous Evaluation" />
+  <title>Hands-on Course: Build AI Agents and Harness Engineering from Scratch</title>
+  <meta name="description" content="A hands-on course for engineers on AI Agents and Harness Engineering: organized around Harness 12-Factor, handwriting Agent Loop, tool contracts, context management, fault tolerance, permission sandbox, observability, multi-agent orchestration, and continuous evaluation." />
+  <meta name="keywords" content="AI Agent, Harness Engineering, LLM, tool calling, observability, multi-agent orchestration, sandbox, human-in-the-loop gate, 12-Factor, Config-Driven, Continuous Evaluation" />
   <meta name="author" content="albert-lv" />
   <link rel="canonical" href="https://harness-101.pages.dev/" />
-  <meta property="og:title" content="从零构建 AI Agent 与 Harness Engineering 实战课程" />
-  <meta property="og:description" content="面向工程师的 AI Agent 与 Harness Engineering 实战课程：以 Harness 12-Factor 为主线，手写 Agent Loop、工具契约、Context 管理、容错、权限沙箱、可观测性、多 Agent 编排与持续评估。" />
+  <meta property="og:title" content="Hands-on Course: Build AI Agents and Harness Engineering from Scratch" />
+  <meta property="og:description" content="A hands-on course for engineers on AI Agents and Harness Engineering: organized around Harness 12-Factor, handwriting Agent Loop, tool contracts, context management, fault tolerance, permission sandbox, observability, multi-agent orchestration, and continuous evaluation." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://harness-101.pages.dev/" />
   <meta property="og:image" content="https://harness-101.pages.dev/og-image.png" />
-  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:locale" content="en_US" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="从零构建 AI Agent 与 Harness Engineering 实战课程" />
-  <meta name="twitter:description" content="面向工程师的 AI Agent 与 Harness Engineering 实战课程：以 Harness 12-Factor 为主线，手写 Agent Loop、工具契约、Context 管理、容错、权限沙箱、可观测性、多 Agent 编排与持续评估。" />
+  <meta name="twitter:title" content="Hands-on Course: Build AI Agents and Harness Engineering from Scratch" />
+  <meta name="twitter:description" content="A hands-on course for engineers on AI Agents and Harness Engineering: organized around Harness 12-Factor, handwriting Agent Loop, tool contracts, context management, fault tolerance, permission sandbox, observability, multi-agent orchestration, and continuous evaluation." />
   <meta name="twitter:image" content="https://harness-101.pages.dev/og-image.png" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "Course",
-    "name": "从零构建 AI Agent 与 Harness Engineering 实战课程",
-    "description": "面向工程师的 AI Agent 与 Harness Engineering 实战课程：以 Harness 12-Factor 为主线，手写 Agent Loop、工具契约、Context 管理、容错、权限沙箱、可观测性、多 Agent 编排与持续评估。",
+    "name": "Hands-on Course: Build AI Agents and Harness Engineering from Scratch",
+    "description": "A hands-on course for engineers on AI Agents and Harness Engineering: organized around Harness 12-Factor, handwriting Agent Loop, tool contracts, context management, fault tolerance, permission sandbox, observability, multi-agent orchestration, and continuous evaluation.",
     "provider": {
       "@type": "Organization",
       "name": "albert-lv",
@@ -41,7 +41,7 @@
       }
     },
     "educationalLevel": "intermediate",
-    "inLanguage": "zh-CN",
+    "inLanguage": "en",
     "isAccessibleForFree": true,
     "license": "https://opensource.org/licenses/MIT"
   }
@@ -270,35 +270,35 @@
 <body>
   <header class="topbar">
     <div style="display:flex;align-items:center;gap:0.6rem;">
-      <button id="menuBtn" class="menu-btn" aria-label="打开菜单">☰</button>
+      <button id="menuBtn" class="menu-btn" aria-label="Open menu">☰</button>
       <h1>AI Agent × Harness Engineering</h1>
     </div>
     <div class="topbar-actions">
       <a href="https://github.com/albert-lv/harness-101" target="_blank" rel="noopener noreferrer">GitHub</a>
-      <button id="themeBtn" class="theme-btn" aria-label="切换暗色模式">🌙/☀️</button>
+      <button id="themeBtn" class="theme-btn" aria-label="Toggle dark mode">🌙/☀️</button>
     </div>
   </header>
 
   <div class="layout">
-    <aside id="sidebar" class="sidebar" aria-label="课程导航">
+    <aside id="sidebar" class="sidebar" aria-label="Course navigation">
       <nav>
-        <a href="#overview">课程总览</a>
-        <a href="#prep">前置</a>
+        <a href="#overview">Overview</a>
+        <a href="#prep">Prerequisite</a>
         <a href="#factor-1">F1 Agent Loop</a>
         <a href="#factor-2">F2 Tool Contract</a>
         <a href="#factor-3">F3 Context</a>
-        <a href="#factor-4">F4 失败优先</a>
-        <a href="#factor-5">F5 优雅降级</a>
-        <a href="#factor-6">F6 最小权限</a>
-        <a href="#factor-7">F7 人工确认</a>
-        <a href="#factor-8">F8 可观测</a>
-        <a href="#factor-9">F9 可复现</a>
-        <a href="#factor-10">F10 可编排</a>
-        <a href="#factor-11">F11 配置驱动</a>
-        <a href="#factor-12">F12 持续评估</a>
-        <a href="#advanced">进阶</a>
-        <a href="#capstone">结课项目</a>
-        <a href="#appendix">附录</a>
+        <a href="#factor-4">F4 Failure-First</a>
+        <a href="#factor-5">F5 Graceful Degradation</a>
+        <a href="#factor-6">F6 Least Privilege</a>
+        <a href="#factor-7">F7 Human-in-the-Loop</a>
+        <a href="#factor-8">F8 Observability</a>
+        <a href="#factor-9">F9 Reproducibility</a>
+        <a href="#factor-10">F10 Composable</a>
+        <a href="#factor-11">F11 Config-Driven</a>
+        <a href="#factor-12">F12 Evaluation</a>
+        <a href="#advanced">Advanced</a>
+        <a href="#capstone">Capstone</a>
+        <a href="#appendix">Appendix</a>
       </nav>
     </aside>
     <div id="overlay" class="overlay"></div>
@@ -306,359 +306,359 @@
     <main>
       <div class="content">
         <section id="overview">
-          <h1 class="hero-title">从零构建 AI Agent 与 Harness Engineering 实战课程</h1>
-          <p>一门面向工程师的动手课：先手写一个 Agent，再把它打磨成可靠的运行时（Harness）。本课程以 <strong>Harness 12-Factor</strong> 为主线，每章对应一条生产级设计原则。</p>
-          <blockquote class="core-quote">不要把 Agent 当 AI 来学，把它当成一个不可靠的分布式系统来学。</blockquote>
-          <p><strong>前置要求：</strong>Python 基础、命令行、一个 LLM API Key（推荐 Anthropic Claude，亦可用兼容 API）。</p>
+          <h1 class="hero-title">Hands-on Course: Build AI Agents and Harness Engineering from Scratch</h1>
+          <p>A hands-on course for engineers: first write an Agent by hand, then polish it into a reliable runtime (Harness). This course is organized around <strong>Harness 12-Factor</strong>, with each chapter corresponding to a production-grade design principle.</p>
+          <blockquote class="core-quote">Don't learn Agent as AI; learn it as an unreliable distributed system.</blockquote>
+          <p><strong>Prerequisites:</strong> Python basics, command line, and an LLM API Key (Anthropic Claude recommended; any compatible API works).</p>
           <table>
-            <thead><tr><th>Factor</th><th>原则</th><th>关键产出</th></tr></thead>
+            <thead><tr><th>Factor</th><th>Principle</th><th>Key Deliverable</th></tr></thead>
             <tbody>
-              <tr><td>前置</td><td>环境与第一次 API 调用</td><td>跑通最小 LLM 调用</td></tr>
-              <tr><td>F1</td><td>Single Agent Loop</td><td>100 行最小 Agent</td></tr>
-              <tr><td>F2</td><td>Explicit Tool Contract</td><td>健壮工具接口</td></tr>
-              <tr><td>F3</td><td>Context Budgeting</td><td>不会爆 context 的 Agent</td></tr>
-              <tr><td>F4 <span class="star">★</span></td><td>Failure-First Design</td><td>可恢复 Agent</td></tr>
-              <tr><td>F5</td><td>Graceful Degradation</td><td>失败时 degrade 不 crash</td></tr>
-              <tr><td>F6</td><td>Least-Privilege Tooling</td><td>最小权限 + 白名单</td></tr>
-              <tr><td>F7</td><td>Human-in-the-Loop Gates</td><td>可恢复人工确认门</td></tr>
-              <tr><td>F8</td><td>Observable by Default</td><td>可回放 trace</td></tr>
-              <tr><td>F9</td><td>Reproducible Runs</td><td>失败可被复现/回归</td></tr>
-              <tr><td>F10</td><td>Composable Agents</td><td>主-子编排器</td></tr>
-              <tr><td>F11</td><td>Config-Driven Behavior</td><td>配置驱动 Harness</td></tr>
-              <tr><td>F12</td><td>Continuous Evaluation</td><td>量化评估体系</td></tr>
+              <tr><td>Prerequisite</td><td>Environment and first API call</td><td>Get the minimal LLM call working</td></tr>
+              <tr><td>F1</td><td>Single Agent Loop</td><td>100-line minimal Agent</td></tr>
+              <tr><td>F2</td><td>Explicit Tool Contract</td><td>Robust tool interfaces</td></tr>
+              <tr><td>F3</td><td>Context Budgeting</td><td>Agent that won't blow up its context</td></tr>
+              <tr><td>F4 <span class="star">★</span></td><td>Failure-First Design</td><td>Recoverable Agent</td></tr>
+              <tr><td>F5</td><td>Graceful Degradation</td><td>Degrades instead of crashes</td></tr>
+              <tr><td>F6</td><td>Least-Privilege Tooling</td><td>Least privilege + allowlist</td></tr>
+              <tr><td>F7</td><td>Human-in-the-Loop Gates</td><td>Recoverable confirmation gate</td></tr>
+              <tr><td>F8</td><td>Observable by Default</td><td>Replayable trace</td></tr>
+              <tr><td>F9</td><td>Reproducible Runs</td><td>Failures reproducible / regressable</td></tr>
+              <tr><td>F10</td><td>Composable Agents</td><td>Master-sub orchestrator</td></tr>
+              <tr><td>F11</td><td>Config-Driven Behavior</td><td>Config-driven Harness</td></tr>
+              <tr><td>F12</td><td>Continuous Evaluation</td><td>Quantitative evaluation</td></tr>
             </tbody>
           </table>
         </section>
 
         <section id="prep">
-          <h2>前置：环境与第一次 API 调用</h2>
-          <div class="goal-card"><strong>学习目标：</strong>搭好环境，理解一次 LLM 请求/响应最小结构。</div>
-          <h3>核心内容</h3>
+          <h2>Prerequisite: Environment and First API Call</h2>
+          <div class="goal-card"><strong>Learning Goal:</strong> Set up the environment and understand the minimal structure of an LLM request/response.</div>
+          <h3>Core Content</h3>
           <ul>
-            <li>SDK 安装、API Key 环境变量配置。</li>
-            <li>最小调用三要素：system prompt、messages、模型参数。</li>
-            <li>理解 token 计费与长度约束。</li>
-            <li>流式与非流式响应差异。</li>
+            <li>SDK installation and API Key environment variable configuration.</li>
+            <li>Minimal call three elements: system prompt, messages, model parameters.</li>
+            <li>Understanding token billing and length constraints.</li>
+            <li>Difference between streaming and non-streaming responses.</li>
           </ul>
-          <h3>动手练习</h3>
+          <h3>Hands-on Exercises</h3>
           <ol class="exercise-list">
-            <li>写 <code>chat.py</code>，命令行输入一句话并打印回复。</li>
-            <li>加多轮循环并维护 <code>messages</code>，观察 context 增长。</li>
+            <li>Write <code>chat.py</code> that receives a sentence from the command line and prints the reply.</li>
+            <li>Add a multi-turn loop and maintain <code>messages</code>, observing context growth.</li>
           </ol>
-          <div class="output-card"><strong>产出物：</strong>可多轮对话并打印 token 消耗的命令行脚本。</div>
+          <div class="output-card"><strong>Deliverable:</strong> A command-line script that can do multi-turn conversation and print token consumption.</div>
         </section>
 
         <section id="factor-1">
-          <h2>Factor 1：Single Agent Loop</h2>
-          <div class="goal-card"><strong>学习目标：</strong>实现带工具的 REPL 循环，理解 Agent 本质是状态机。</div>
-          <h3>核心内容</h3>
+          <h2>Factor 1: Single Agent Loop</h2>
+          <div class="goal-card"><strong>Learning Goal:</strong> Implement a tool-equipped REPL loop and understand that Agent is a state machine.</div>
+          <h3>Core Content</h3>
           <ul>
-            <li><code>调模型 → 解析工具调用 → 执行工具 → 结果回填 context</code> 直到完成。</li>
-            <li>Tool calling 协议（name/description/参数 schema）。</li>
-            <li>解析 tool_use 并映射到 Python 函数。</li>
-            <li>模型不再请求工具时终止循环。</li>
+            <li><code>Call model → Parse tool call → Execute tool → Feed result back into context</code> until done.</li>
+            <li>Tool calling protocol (name/description/parameter schema).</li>
+            <li>Parse tool_use and map to Python functions.</li>
+            <li>Loop terminates when model no longer requests tools.</li>
           </ul>
-          <h3>动手练习</h3>
+          <h3>Hands-on Exercises</h3>
           <ol class="exercise-list">
-            <li>不用框架，约 100 行实现 loop。</li>
-            <li>注册第一个工具（如 <code>run_command</code> / 文件读取 / 计算器）。</li>
-            <li>完成 2-3 步工具调用任务并打印每一步动作。</li>
+            <li>Implement the loop in about 100 lines without any framework.</li>
+            <li>Register the first tool (e.g. <code>run_command</code> / file read / calculator).</li>
+            <li>Complete a 2-3 step tool-calling task and print each step's action.</li>
           </ol>
-          <div class="output-card"><strong>产出物：</strong>最小但完整的多步 Agent。</div>
+          <div class="output-card"><strong>Deliverable:</strong> A minimal but complete multi-step Agent.</div>
         </section>
 
         <section id="factor-2">
-          <h2>Factor 2：Explicit Tool Contract</h2>
-          <div class="goal-card"><strong>学习目标：</strong>设计让模型用得对、用得稳的工具接口。</div>
-          <h3>核心内容</h3>
+          <h2>Factor 2: Explicit Tool Contract</h2>
+          <div class="goal-card"><strong>Learning Goal:</strong> Design tool interfaces that the model uses correctly and reliably.</div>
+          <h3>Core Content</h3>
           <ul>
-            <li>工具 description 本身就是 prompt。</li>
-            <li>参数校验必须在工具内进行。</li>
-            <li>返回值要利于模型继续决策。</li>
-            <li>错误作为正常返回值，避免 loop 崩溃。</li>
-            <li>有副作用工具要考虑幂等。</li>
+            <li>Tool description itself is prompt.</li>
+            <li>Parameter validation must be done inside the tool.</li>
+            <li>Return values should help the model continue making decisions.</li>
+            <li>Return errors as normal values; avoid crashing the loop.</li>
+            <li>Tools with side effects must consider idempotency.</li>
           </ul>
-          <h3>动手练习</h3>
+          <h3>Hands-on Exercises</h3>
           <ol class="exercise-list">
-            <li>重构 Factor 1 工具，加参数校验和友好错误。</li>
-            <li>设计有副作用工具并防止重复执行。</li>
-            <li>故意写模糊 description，观察误用。</li>
+            <li>Refactor Factor 1 tools, add parameter validation and friendly errors.</li>
+            <li>Design a tool with side effects and prevent repeated execution.</li>
+            <li>Deliberately write a vague description and observe misuse.</li>
           </ol>
-          <div class="output-card"><strong>产出物：</strong>一套健壮工具规范 + 2-3 个示例工具。</div>
+          <div class="output-card"><strong>Deliverable:</strong> A robust tool specification + 2-3 example tools.</div>
         </section>
 
         <section id="factor-3">
-          <h2>Factor 3：Context Budgeting</h2>
-          <div class="goal-card"><strong>学习目标：</strong>处理 context 爆掉问题。</div>
-          <h3>核心内容</h3>
+          <h2>Factor 3: Context Budgeting</h2>
+          <div class="goal-card"><strong>Learning Goal:</strong> Handle the context overflow problem.</div>
+          <h3>Core Content</h3>
           <ul>
-            <li>长任务和大工具输出会快速撑满窗口。</li>
-            <li>策略：截断、摘要、外置记忆。</li>
-            <li>在信息损失和成本之间做权衡。</li>
-            <li>区分常驻 system prompt 与动态注入信息。</li>
+            <li>Long tasks and large tool outputs quickly fill the window.</li>
+            <li>Strategies: truncation, summarization, external memory.</li>
+            <li>Tradeoffs between information loss and cost.</li>
+            <li>Distinguish permanent system prompt from dynamically injected information.</li>
           </ul>
-          <h3>动手练习</h3>
+          <h3>Hands-on Exercises</h3>
           <ol class="exercise-list">
-            <li>用超长输出工具复现 context 爆掉。</li>
-            <li>实现截断与阈值摘要策略。</li>
-            <li>比较两种策略对任务质量影响。</li>
+            <li>Use an ultra-long output tool to reproduce context overflow.</li>
+            <li>Implement truncation and threshold summarization strategies.</li>
+            <li>Compare task quality impact of the two strategies.</li>
           </ol>
-          <div class="output-card"><strong>产出物：</strong>长任务下仍稳定的 Agent。</div>
+          <div class="output-card"><strong>Deliverable:</strong> An Agent that remains stable under long tasks.</div>
         </section>
 
         <section id="factor-4">
-          <h2>Factor 4：Failure-First Design <span class="star">★</span></h2>
-          <div class="goal-card"><strong>学习目标：</strong>系统性修复死循环、跑偏、幻觉调用与部分失败。</div>
-          <h3>核心内容</h3>
+          <h2>Factor 4: Failure-First Design <span class="star">★</span></h2>
+          <div class="goal-card"><strong>Learning Goal:</strong> Systematically fix infinite loops, drift, hallucinated calls, and partial failures.</div>
+          <h3>Core Content</h3>
           <ul>
-            <li>死循环检测与打断（最大步数、重复检测）。</li>
-            <li>阶段目标与自检避免跑偏。</li>
-            <li>拦截未知工具与异常参数。</li>
-            <li>多步任务的部分失败恢复。</li>
-            <li>限流/超时重试与退避。</li>
+            <li>Infinite loop detection and breaking (max steps, repeat detection).</li>
+            <li>Phased goals and self-checks to avoid drift.</li>
+            <li>Intercept unknown tools and abnormal parameters.</li>
+            <li>Partial failure recovery in multi-step tasks.</li>
+            <li>Rate limit / timeout retry and backoff.</li>
           </ul>
-          <h3>动手练习</h3>
+          <h3>Hands-on Exercises</h3>
           <ol class="exercise-list">
-            <li>人为注入工具错误、限流、未知工具。</li>
-            <li>为每种失败加 Harness 防护。</li>
-            <li>记录真实任务跑偏位置并改进。</li>
+            <li>Artificially inject tool errors, rate limits, and unknown tools.</li>
+            <li>Add Harness guards for each failure type.</li>
+            <li>Record where a real task drifts and improve.</li>
           </ol>
-          <div class="output-card"><strong>产出物：</strong>能从多种错误中恢复的 Agent。</div>
+          <div class="output-card"><strong>Deliverable:</strong> An Agent that can recover from multiple error types.</div>
         </section>
 
         <section id="factor-5">
-          <h2>Factor 5：Graceful Degradation</h2>
-          <div class="goal-card"><strong>学习目标：</strong>模型或工具失败时，系统降级而不是崩溃。</div>
-          <h3>核心内容</h3>
+          <h2>Factor 5: Graceful Degradation</h2>
+          <div class="goal-card"><strong>Learning Goal:</strong> When model or tool fails, the system degrades rather than crashes.</div>
+          <h3>Core Content</h3>
           <ul>
-            <li>降级策略金字塔：完全成功 → 部分成功 → 安全兜底 → 优雅失败。</li>
-            <li>模型乱答/拒绝时用更简单 prompt 或预设模板重试。</li>
-            <li>工具不可用时报错并让模型换路径。</li>
-            <li>多步任务中保留已完成部分。</li>
-            <li>给用户清晰状态说明，而非堆栈。</li>
+            <li>Degradation strategy pyramid: full success → partial success → safe fallback → graceful failure.</li>
+            <li>When model rambles/refuses, retry with simpler prompt or preset template.</li>
+            <li>When tool is unavailable, return error and let model find another path.</li>
+            <li>Preserve completed portions in multi-step tasks.</li>
+            <li>Give users clear status explanation instead of stack traces.</li>
           </ul>
-          <h3>动手练习</h3>
+          <h3>Hands-on Exercises</h3>
           <ol class="exercise-list">
-            <li>给 Factor 4 的 Agent 加"降级模式"开关。</li>
-            <li>模拟工具完全不可用，观察 Agent 给出替代方案。</li>
-            <li>设计连续乱答时的安全兜底回复。</li>
+            <li>Add a "degradation mode" switch to Factor 4's Agent.</li>
+            <li>Simulate a tool completely unavailable; observe if Agent provides an alternative.</li>
+            <li>Design a safe fallback response for continuous rambling.</li>
           </ol>
-          <div class="output-card"><strong>产出物：</strong>失败时 degrade 而非 crash 的 Agent。</div>
+          <div class="output-card"><strong>Deliverable:</strong> An Agent that degrades rather than crashes in the face of failure.</div>
         </section>
 
         <section id="factor-6">
-          <h2>Factor 6：Least-Privilege Tooling</h2>
-          <div class="goal-card"><strong>学习目标：</strong>让 Agent 安全地访问真实世界。</div>
-          <h3>核心内容</h3>
+          <h2>Factor 6: Least-Privilege Tooling</h2>
+          <div class="goal-card"><strong>Learning Goal:</strong> Let the Agent safely access the real world.</div>
+          <h3>Core Content</h3>
           <ul>
-            <li>工具白名单与上下文级权限控制。</li>
-            <li>沙箱执行：文件系统和网络隔离。</li>
-            <li>最小权限原则：默认只读，显式授权写入。</li>
-            <li>危险操作分类：自动放行 / 必须确认 / 永远禁止。</li>
+            <li>Tool allowlist and context-level permission control.</li>
+            <li>Sandbox execution: filesystem and network isolation.</li>
+            <li>Principle of least privilege: read-only by default, explicit authorization for writes.</li>
+            <li>Dangerous operation classification: auto-approve / must confirm / permanently forbidden.</li>
           </ul>
-          <h3>动手练习</h3>
+          <h3>Hands-on Exercises</h3>
           <ol class="exercise-list">
-            <li>实现只读模式拦截写操作。</li>
-            <li>给副作用工具增加确认门。</li>
-            <li>编写权限模型清单。</li>
+            <li>Implement read-only mode to intercept write operations.</li>
+            <li>Add confirmation gates to tools with side effects.</li>
+            <li>Write a permission model checklist.</li>
           </ol>
-          <div class="output-card"><strong>产出物：</strong>默认最小权限、危险操作需确认的 Agent。</div>
+          <div class="output-card"><strong>Deliverable:</strong> An Agent with least privilege by default and confirmation for dangerous operations.</div>
         </section>
 
         <section id="factor-7">
-          <h2>Factor 7：Human-in-the-Loop Gates</h2>
-          <div class="goal-card"><strong>学习目标：</strong>不可逆操作暂停等人确认，状态可恢复。</div>
-          <h3>核心内容</h3>
+          <h2>Factor 7: Human-in-the-Loop Gates</h2>
+          <div class="goal-card"><strong>Learning Goal:</strong> Irreversible operations pause for human confirmation; state is recoverable.</div>
+          <h3>Core Content</h3>
           <ul>
-            <li>确认门状态机：运行中 → 挂起等待 → 恢复执行 → 完成。</li>
-            <li>挂起时保存完整 context 与 trace，支持退出后恢复。</li>
-            <li>批量确认 vs 单条确认。</li>
-            <li>超时策略与审计日志。</li>
+            <li>Confirmation gate state machine: running → suspended awaiting → resumed execution → completed.</li>
+            <li>When suspended, save full context and trace; supports exit and later resume.</li>
+            <li>Batch confirmation vs single confirmation.</li>
+            <li>Timeout strategy and audit logs.</li>
           </ul>
-          <h3>动手练习</h3>
+          <h3>Hands-on Exercises</h3>
           <ol class="exercise-list">
-            <li>把确认做成 loop 内显式状态。</li>
-            <li>实现挂起-恢复：程序退出后重载状态继续执行。</li>
-            <li>给确认门加超时与审计事件。</li>
+            <li>Make confirmation an explicit state inside the loop.</li>
+            <li>Implement suspend-resume: reload state after program exit and continue execution.</li>
+            <li>Add timeout and audit events to the confirmation gate.</li>
           </ol>
-          <div class="output-card"><strong>产出物：</strong>具备可恢复人工确认门的 Agent。</div>
+          <div class="output-card"><strong>Deliverable:</strong> An Agent with a recoverable human confirmation gate.</div>
         </section>
 
         <section id="factor-8">
-          <h2>Factor 8：Observable by Default</h2>
-          <div class="goal-card"><strong>学习目标：</strong>让每次运行可见、可回放、可 debug。</div>
-          <h3>核心内容</h3>
+          <h2>Factor 8: Observable by Default</h2>
+          <div class="goal-card"><strong>Learning Goal:</strong> Make every run visible, replayable, and debuggable.</div>
+          <h3>Core Content</h3>
           <ul>
-            <li>结构化事件：思考、工具调用、结果、错误、完成。</li>
-            <li>结构化日志：输入输出、token、耗时。</li>
-            <li>基于 trace 复现与排障。</li>
-            <li>成本观测：token、时延、费用。</li>
+            <li>Structured events: thinking, tool calling, results, errors, completion.</li>
+            <li>Structured logging: input/output, tokens, time spent.</li>
+            <li>Reproduce and troubleshoot based on trace.</li>
+            <li>Cost observability: tokens, latency, cost.</li>
           </ul>
-          <h3>动手练习</h3>
+          <h3>Hands-on Exercises</h3>
           <ol class="exercise-list">
-            <li>输出 JSONL 事件日志。</li>
-            <li>实现一个简易 trace 时间线查看器。</li>
-            <li>用 trace 定位一次跑偏根因。</li>
+            <li>Output JSONL event logs.</li>
+            <li>Implement a simple trace timeline viewer.</li>
+            <li>Use trace to locate the root cause of a drift.</li>
           </ol>
-          <div class="output-card"><strong>产出物：</strong>每次运行都可追踪回放的 Agent。</div>
+          <div class="output-card"><strong>Deliverable:</strong> An Agent whose every run can be traced and replayed.</div>
         </section>
 
         <section id="factor-9">
-          <h2>Factor 9：Reproducible Runs</h2>
-          <div class="goal-card"><strong>学习目标：</strong>给定 trace 和配置，能复现或定位一次失败运行。</div>
-          <h3>核心内容</h3>
+          <h2>Factor 9: Reproducible Runs</h2>
+          <div class="goal-card"><strong>Learning Goal:</strong> Given trace and config, reproduce or locate a failed run.</div>
+          <h3>Core Content</h3>
           <ul>
-            <li>复现三要素：trace + config + seed。</li>
-            <li>loop 路径与工具调用可复现，LLM 输出本身有随机性。</li>
-            <li>把失败 trace 变成回归测试。</li>
-            <li>replay 模式：用旧 trace 替代真实调用，快速验证 Harness。</li>
+            <li>Three elements of reproduction: trace + config + seed.</li>
+            <li>Loop paths and tool calls are reproducible; LLM output itself has randomness.</li>
+            <li>Turn failed traces into regression tests.</li>
+            <li>Replay mode: use old trace to replace real calls and quickly verify Harness.</li>
           </ul>
-          <h3>动手练习</h3>
+          <h3>Hands-on Exercises</h3>
           <ol class="exercise-list">
-            <li>保存一次失败运行的 trace + config。</li>
-            <li>实现 replay 模式，按记录推进 loop。</li>
-            <li>写测试：给定失败 trace，Agent 必须在第 N 步触发降级。</li>
+            <li>Save trace + config of a failed run.</li>
+            <li>Implement replay mode, advancing loop according to the record.</li>
+            <li>Write a test: given a failed trace, Agent must trigger degradation at step N.</li>
           </ol>
-          <div class="output-card"><strong>产出物：</strong>失败可被复现、修复可被测试验证的 Agent。</div>
+          <div class="output-card"><strong>Deliverable:</strong> An Agent where failures can be reproduced and fixes can be tested.</div>
         </section>
 
         <section id="factor-10">
-          <h2>Factor 10：Composable Agents</h2>
-          <div class="goal-card"><strong>学习目标：</strong>从单 Agent 升级到主-子编排器。</div>
-          <h3>核心内容</h3>
+          <h2>Factor 10: Composable Agents</h2>
+          <div class="goal-card"><strong>Learning Goal:</strong> Upgrade from single Agent to master-sub orchestrator.</div>
+          <h3>Core Content</h3>
           <ul>
-            <li>适用场景：并行分解、上下文隔离、角色分工。</li>
-            <li>orchestrator-worker 模式：拆分、派发、汇总。</li>
-            <li>并行执行与结果合并策略。</li>
-            <li>子 Agent 失败隔离与恢复。</li>
+            <li>Applicable scenarios: parallel decomposition, context isolation, role-based division.</li>
+            <li>orchestrator-worker pattern: split, dispatch, aggregate.</li>
+            <li>Parallel execution and result merge strategies.</li>
+            <li>Sub-Agent failure isolation and recovery.</li>
           </ul>
-          <h3>动手练习</h3>
+          <h3>Hands-on Exercises</h3>
           <ol class="exercise-list">
-            <li>实现主 Agent 拆分子任务。</li>
-            <li>并行运行多个子 Agent 并汇总结果。</li>
-            <li>复用 Factor 8 trace 支持编排调试。</li>
+            <li>Implement a master Agent that splits tasks into sub-tasks.</li>
+            <li>Run multiple sub-Agents in parallel and aggregate results.</li>
+            <li>Reuse Factor 8 trace to support orchestration debugging.</li>
           </ol>
-          <div class="output-card"><strong>产出物：</strong>可并行执行并汇总的多 Agent 编排器。</div>
+          <div class="output-card"><strong>Deliverable:</strong> A multi-Agent orchestrator that can execute in parallel and aggregate results.</div>
         </section>
 
         <section id="factor-11">
-          <h2>Factor 11：Config-Driven Behavior</h2>
-          <div class="goal-card"><strong>学习目标：</strong>把模型、prompt、工具列表、安全策略外置到配置。</div>
-          <h3>核心内容</h3>
+          <h2>Factor 11: Config-Driven Behavior</h2>
+          <div class="goal-card"><strong>Learning Goal:</strong> Externalize model, prompt, tool list, and security policy to configuration.</div>
+          <h3>Core Content</h3>
           <ul>
-            <li>什么该进配置：模型名、温度、max_tokens、system prompt、工具列表、安全策略等。</li>
-            <li>按环境拆分配置：dev / staging / prod。</li>
-            <li>用不同 config 做 A/B 测试。</li>
-            <li>配置变更应触发自动化测试。</li>
+            <li>What belongs in config: model name, temperature, max_tokens, system prompt, tool list, security policy, etc.</li>
+            <li>Split config by environment: dev / staging / prod.</li>
+            <li>A/B test with different configs.</li>
+            <li>Config changes should trigger automated tests.</li>
           </ul>
-          <h3>动手练习</h3>
+          <h3>Hands-on Exercises</h3>
           <ol class="exercise-list">
-            <li>把前面章节的硬编码参数抽到 <code>config.yaml</code>。</li>
-            <li>写"激进模式"与"保守模式"两种配置。</li>
-            <li>同一任务分别跑两种配置，观察行为差异。</li>
+            <li>Extract all hardcoded parameters from previous chapters into <code>config.yaml</code>.</li>
+            <li>Write "aggressive mode" and "conservative mode" configs.</li>
+            <li>Run the same task with both configs and observe behavioral differences.</li>
           </ol>
-          <div class="output-card"><strong>产出物：</strong>行为完全由配置驱动的 Harness。</div>
+          <div class="output-card"><strong>Deliverable:</strong> A Harness whose behavior is fully driven by configuration.</div>
         </section>
 
         <section id="factor-12">
-          <h2>Factor 12：Continuous Evaluation</h2>
-          <div class="goal-card"><strong>学习目标：</strong>用指标持续衡量 Harness 质量，而不是只看 demo。</div>
-          <h3>核心内容</h3>
+          <h2>Factor 12: Continuous Evaluation</h2>
+          <div class="goal-card"><strong>Learning Goal:</strong> Measure Harness quality with metrics continuously, not just by whether the demo works.</div>
+          <h3>Core Content</h3>
           <ul>
-            <li>核心指标：完成率、失败率、恢复率、平均步数/token/延迟/成本、人工介入率。</li>
-            <li>评估数据集：收集真实任务和已知失败 case。</li>
-            <li>批量 runner 自动判断成功/失败，输出报表。</li>
-            <li>从指标回推设计：哪个 Factor 差就优先改进哪个。</li>
+            <li>Core metrics: completion rate, failure rate, recovery rate, average steps/tokens/latency/cost, human-in-the-loop rate.</li>
+            <li>Evaluation dataset: collect real tasks and known failure cases.</li>
+            <li>Batch runner that auto-judges success/failure and outputs a report.</li>
+            <li>Design from metrics backwards: whichever Factor is poor, prioritize improving it.</li>
           </ul>
-          <h3>动手练习</h3>
+          <h3>Hands-on Exercises</h3>
           <ol class="exercise-list">
-            <li>准备 10-20 个代表性任务（含陷阱 case）。</li>
-            <li>写 <code>evaluate.py</code> 批量运行并记录指标。</li>
-            <li>修改 Harness 后重跑评估，看关键指标是否提升。</li>
+            <li>Prepare 10-20 representative tasks (including trap cases).</li>
+            <li>Write <code>evaluate.py</code> to batch-run and record metrics.</li>
+            <li>After modifying Harness, rerun evaluation and see if key metrics improved.</li>
           </ol>
-          <div class="output-card"><strong>产出物：</strong>能量化评估并持续改进的 Harness。</div>
+          <div class="output-card"><strong>Deliverable:</strong> A Harness that can be quantitatively evaluated and continuously improved.</div>
         </section>
 
         <section id="advanced">
-          <h2>进阶：阅读真实 Harness</h2>
-          <div class="goal-card"><strong>学习目标：</strong>带着问题读成熟 Harness 源码并迁移改进。</div>
-          <h3>核心内容</h3>
+          <h2>Advanced: Reading Real Harnesses</h2>
+          <div class="goal-card"><strong>Learning Goal:</strong> Read mature Harness source code with questions in mind and migrate improvements.</div>
+          <h3>Core Content</h3>
           <ul>
-            <li>重点看 context 管理、容错、权限、可观测、编排、配置、评估。</li>
-            <li>按问题驱动阅读，不盲目通读。</li>
-            <li>抽取可迁移设计并落地到自己的 Agent。</li>
+            <li>Focus on context management, fault tolerance, permissions, observability, orchestration, config, evaluation.</li>
+            <li>Question-driven reading, not blind full reads.</li>
+            <li>Extract transferable designs and land them in your own Agent.</li>
           </ul>
-          <h3>动手练习</h3>
+          <h3>Hands-on Exercises</h3>
           <ol class="exercise-list">
-            <li>围绕 6 个问题各写一段精读笔记。</li>
-            <li>迁移至少 1 处设计到自己的 Agent。</li>
+            <li>Write a deep-reading note for each of 6 questions.</li>
+            <li>Port at least 1 design to your own Agent.</li>
           </ol>
-          <div class="output-card"><strong>产出物：</strong>源码精读笔记 + 至少一项工程改进。</div>
+          <div class="output-card"><strong>Deliverable:</strong> Source-code deep-reading notes + at least one engineering improvement.</div>
         </section>
 
         <section id="capstone">
-          <h2>结课项目：一个完整的领域 Agent</h2>
-          <div class="goal-card"><strong>目标：</strong>综合所有 Factor，交付一个真实可用的领域 Agent。</div>
+          <h2>Capstone Project: A Complete Domain Agent</h2>
+          <div class="goal-card"><strong>Goal:</strong> Combine all Factors to deliver a real, usable domain Agent.</div>
           <ul>
-            <li>运维/网络方向：并行排查多设备，写操作需确认，全程 trace。</li>
-            <li>数据方向：自主查询、清洗、生成报告。</li>
-            <li>开发方向：读代码、定位 bug、提出修复。</li>
+            <li>Operations / Network direction: parallel diagnosis of multiple devices, writes require confirmation, full trace.</li>
+            <li>Data direction: autonomous query, cleaning, and report generation.</li>
+            <li>Development direction: read codebase, locate bugs, propose fixes.</li>
           </ul>
-          <h3>12-Factor 成熟度自评清单</h3>
+          <h3>12-Factor Maturity Self-Assessment Checklist</h3>
           <ul class="checklist">
-            <li><label><input type="checkbox" data-factor="f1"> F1 手写 agent loop（非重型框架）</label></li>
-            <li><label><input type="checkbox" data-factor="f2"> F2 有校验且错误优雅返回的工具</label></li>
-            <li><label><input type="checkbox" data-factor="f3"> F3 context 管理，长任务不崩</label></li>
-            <li><label><input type="checkbox" data-factor="f4"> F4 失败恢复（工具错误、死循环、限流）</label></li>
-            <li><label><input type="checkbox" data-factor="f5"> F5 降级策略，失败不崩溃</label></li>
-            <li><label><input type="checkbox" data-factor="f6"> F6 权限模型，危险操作需确认</label></li>
-            <li><label><input type="checkbox" data-factor="f7"> F7 人工确认门可挂起-恢复</label></li>
-            <li><label><input type="checkbox" data-factor="f8"> F8 完整 trace，可回放 debug</label></li>
-            <li><label><input type="checkbox" data-factor="f9"> F9 失败运行可被复现/回归测试</label></li>
-            <li><label><input type="checkbox" data-factor="f10"> F10 （进阶）多 agent 编排</label></li>
-            <li><label><input type="checkbox" data-factor="f11"> F11 关键行为由配置驱动</label></li>
-            <li><label><input type="checkbox" data-factor="f12"> F12 有量化评估指标与测试集</label></li>
+            <li><label><input type="checkbox" data-factor="f1"> F1 Handwritten agent loop (not relying on heavy frameworks)</label></li>
+            <li><label><input type="checkbox" data-factor="f2"> F2 Tools with validation and graceful error returns</label></li>
+            <li><label><input type="checkbox" data-factor="f3"> F3 Context management, long tasks don't crash</label></li>
+            <li><label><input type="checkbox" data-factor="f4"> F4 Failure recovery (tool errors, infinite loops, rate limits)</label></li>
+            <li><label><input type="checkbox" data-factor="f5"> F5 Degradation strategy, failures don't crash</label></li>
+            <li><label><input type="checkbox" data-factor="f6"> F6 Permission model, dangerous operations require confirmation</label></li>
+            <li><label><input type="checkbox" data-factor="f7"> F7 Human confirmation gate with suspend-resume</label></li>
+            <li><label><input type="checkbox" data-factor="f8"> F8 Complete trace, replayable and debuggable</label></li>
+            <li><label><input type="checkbox" data-factor="f9"> F9 Failed runs can be reproduced / regression tested</label></li>
+            <li><label><input type="checkbox" data-factor="f10"> F10 (Advanced) Multi-agent orchestration</label></li>
+            <li><label><input type="checkbox" data-factor="f11"> F11 Key behavior driven by configuration</label></li>
+            <li><label><input type="checkbox" data-factor="f12"> F12 Quantitative evaluation metrics and test suite</label></li>
           </ul>
-          <blockquote class="core-quote">先让它工作，再让它可靠，最后才让它复杂。</blockquote>
+          <blockquote class="core-quote">Make it work first, then make it reliable, and only then make it complex.</blockquote>
           <footer>
-            <div>开源学习材料，欢迎 fork、改编、补充。</div>
-            <div>贡献方式：直接修改 <code>agent-harness-course.md</code> 并同步更新 <code>index.html</code>。</div>
-            <div>术语表：<a href="GLOSSARY.md">GLOSSARY.md</a> · 代码示例：<a href="examples/">examples/</a></div>
+            <div>Open-source learning material. Welcome to fork, adapt, and extend.</div>
+            <div>Contribution: directly edit <code>agent-harness-course.md</code> and sync to <code>index.html</code>.</div>
+            <div>Glossary: <a href="GLOSSARY.md">GLOSSARY.md</a> · Code examples: <a href="examples/">examples/</a></div>
           </footer>
         </section>
 
         <section id="appendix">
-          <h2>附录：课程网站实现方案</h2>
-          <div class="goal-card"><strong>目标：</strong>静态单页网站，Cloudflare Pages / GitHub Pages 直接托管，无需构建步骤。</div>
-          <h3>技术选型</h3>
+          <h2>Appendix: Course Website Implementation Plan</h2>
+          <div class="goal-card"><strong>Goal:</strong> Static single-page website, directly hosted on Cloudflare Pages / GitHub Pages, no build step required.</div>
+          <h3>Technology Choices</h3>
           <table>
-            <thead><tr><th>维度</th><th>方案</th><th>理由</th></tr></thead>
+            <thead><tr><th>Dimension</th><th>Solution</th><th>Rationale</th></tr></thead>
             <tbody>
-              <tr><td>构建方式</td><td>单文件 HTML（CSS/JS 内联）</td><td>零依赖、零构建</td></tr>
-              <tr><td>样式</td><td>纯 CSS</td><td>减少加载，避免 CDN 依赖</td></tr>
-              <tr><td>字体</td><td>系统字体栈</td><td>兼顾中文显示与跨平台一致性</td></tr>
-              <tr><td>部署</td><td>Cloudflare Pages（默认）</td><td>推送即上线</td></tr>
+              <tr><td>Build method</td><td>Single-file HTML (CSS/JS inline)</td><td>Zero dependencies, zero build</td></tr>
+              <tr><td>Styling</td><td>Pure CSS</td><td>Reduce loading, avoid CDN dependency</td></tr>
+              <tr><td>Fonts</td><td>System font stack</td><td>Balance Chinese display and cross-platform consistency</td></tr>
+              <tr><td>Deployment</td><td>Cloudflare Pages (default)</td><td>Push and it's live</td></tr>
             </tbody>
           </table>
-          <h3>交互功能</h3>
+          <h3>Interactive Features</h3>
           <ul>
-            <li>锚点平滑滚动导航</li>
-            <li>IntersectionObserver 当前 Factor 高亮</li>
-            <li>暗色模式 + localStorage 记忆</li>
-            <li>移动端汉堡菜单</li>
-            <li>结课项目 12-Factor 进度勾选（localStorage）</li>
+            <li>Anchor smooth-scroll navigation</li>
+            <li>IntersectionObserver current Factor highlight</li>
+            <li>Dark mode + localStorage memory</li>
+            <li>Mobile hamburger menu</li>
+            <li>Capstone 12-Factor progress check (localStorage)</li>
           </ul>
-          <h3>仓库结构</h3>
-          <div class="output-card"><strong>核心文件：</strong><code>index.html</code> + <code>agent-harness-course.md</code> + <code>README.md</code></div>
-          <div class="output-card"><strong>新增资源：</strong><code>GLOSSARY.md</code>（术语表）+ <code>examples/</code>（按 Factor 的骨架代码与参考实现）</div>
-          <h3>后续扩展方向</h3>
+          <h3>Repository Structure</h3>
+          <div class="output-card"><strong>Core files:</strong> <code>index.html</code> + <code>agent-harness-course.md</code> + <code>README.md</code></div>
+          <div class="output-card"><strong>New resources:</strong> <code>GLOSSARY.md</code> (glossary) + <code>examples/</code> (skeleton code and reference implementations by Factor)</div>
+          <h3>Future Expansion Directions</h3>
           <ul>
-            <li>✅ 以 12-Factor 为主线重组课程结构</li>
-            <li>✅ 每个 Factor 加骨架代码和参考实现（见 <code>examples/</code>）</li>
-            <li>✅ 统一术语表（见 <code>GLOSSARY.md</code>）</li>
-            <li>加架构图 / 流程图（Agent loop 状态机图、Harness 分层图、12-Factor 关系图）</li>
-            <li>内容膨胀后迁移到 VitePress（Markdown 驱动，迁移成本低）</li>
-            <li>多语言支持（英文版）</li>
+            <li>✅ Restructure course around 12-Factor</li>
+            <li>✅ Add skeleton code and reference implementations for each Factor (see <code>examples/</code>)</li>
+            <li>✅ Unified glossary (see <code>GLOSSARY.md</code>)</li>
+            <li>Add architecture diagrams / flowcharts (Agent loop state machine, Harness layering, 12-Factor relationships)</li>
+            <li>Migrate to VitePress after content bloat (Markdown-driven, low migration cost)</li>
+            <li>Multilingual support (English version)</li>
           </ul>
         </section>
       </div>

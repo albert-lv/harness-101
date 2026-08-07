@@ -1,107 +1,107 @@
-# 术语表（Glossary）
+# Glossary
 
-> 本课程使用的一致术语。贡献者在新增内容时请优先使用本表定义，避免歧义。
+> Consistent terminology used throughout this course. Contributors should prioritize the definitions in this table when adding new content to avoid ambiguity.
 
 ## Agent
 
-让大语言模型“做事”的循环：它能调用工具、观察结果、做多步决策，而不只是一问一答。Agent 的核心是 **loop**，不是模型本身。
+A loop that enables large language models to "do things": it can call tools, observe results, and make multi-step decisions, rather than just answering questions. The core of an Agent is the **loop**, not the model itself.
 
 ## Harness / Agent Harness
 
-把裸 LLM API 包装成可靠 Agent 的全部工程代码与运行时：上下文管理、prompt 组装、工具执行、权限沙箱、子 Agent 调度、错误恢复、trace。Claude Code、Cursor、OpenHands 本质上都是 Harness。
+All engineering code and runtime that wraps a bare LLM API into a reliable Agent: context management, prompt assembly, tool execution, permission sandboxing, sub-agent scheduling, error recovery, and tracing. Claude Code, Cursor, and OpenHands are fundamentally Harnesses.
 
 ## Agent Loop
 
-Agent 的核心状态机：`调模型 → 解析工具调用 → 执行工具 → 结果回填 context → 再调模型`，直到模型决定完成。
+The core state machine of an Agent: `call model → parse tool calls → execute tools → feed results back into context → call model again` until the model decides to finish.
 
-## Tool / 工具
+## Tool
 
-Agent 与外部世界交互的唯一接口。每个工具包含 name、description（对模型可见的“prompt”）、参数 schema 和实际执行函数。
+The only interface through which an Agent interacts with the external world. Each tool includes a name, description (the "prompt" visible to the model), parameter schema, and the actual execution function.
 
-## Tool Contract / 工具契约
+## Tool Contract
 
-工具的 name、description、参数 schema、返回值格式、副作用与幂等语义的完整约定。契约写得好不好，直接决定模型调用是否正确。
+The complete agreement of a tool: name, description, parameter schema, return format, side effects, and idempotency semantics. The quality of the contract directly determines whether the model calls it correctly.
 
 ## Context / Context Window
 
-模型可见的全部输入文本。长度受限于模型的 context window，token 计费也基于此。Harness 必须管理 context 的预算与质量。
+All input text visible to the model. Length is limited by the model's context window, and token billing is based on it. The Harness must manage context budget and quality.
 
-## Context Budgeting / Context 预算
+## Context Budgeting
 
-把 context 当作有限资源来管理：截断、摘要、外置记忆，在信息损失与成本之间做权衡。
+Managing context as a finite resource: truncation, summarization, external memory — making trade-offs between information loss and cost.
 
-## Tool Call / 工具调用
+## Tool Call
 
-模型在响应中请求调用某个工具，包含工具名和参数。Harness 负责解析、执行并把结果返回给模型。
+When the model requests to invoke a tool in its response, including the tool name and arguments. The Harness is responsible for parsing, executing, and returning results to the model.
 
-## Hallucinated Call / 幻觉调用
+## Hallucinated Call
 
-模型调用不存在的工具，或编造不存在的参数。Harness 必须拦截并纠正。
+When the model calls a non-existent tool or invents non-existent parameters. The Harness must intercept and correct this.
 
-## Dead Loop / 死循环
+## Dead Loop
 
-Agent 反复执行同一动作或反复出错，无法向前推进。需要通过最大步数、重复检测、阶段性目标等手段打断。
+The Agent repeatedly performs the same action or repeatedly errors, unable to make forward progress. Must be interrupted through max steps, repetition detection, and staged goals.
 
-## Drift / 跑偏
+## Drift
 
-Agent 在多步任务中偏离原始目标。通常用阶段目标、自检、人工介入来拉回。
+The Agent deviates from the original goal during multi-step tasks. Usually corrected through staged goals, self-checks, and human intervention.
 
-## Idempotency / 幂等
+## Idempotency
 
-同一操作执行多次与执行一次效果相同。对有副作用的工具（写文件、改配置）至关重要。
+Performing an operation multiple times has the same effect as performing it once. Critical for tools with side effects (writing files, modifying configs).
 
-## Allow-List / 白名单
+## Allow-List
 
-明确列出哪些工具在哪些上下文中可用。最小权限原则的体现：默认拒绝，显式授权。
+Explicitly listing which tools are available in which contexts. The principle of least privilege: default deny, explicit grant.
 
-## Human-in-the-Loop / 人工确认门
+## Human-in-the-Loop
 
-对危险或不可逆操作，Harness 暂停执行并等待人类确认，具备可恢复状态。
+For dangerous or irreversible operations, the Harness pauses execution and waits for human confirmation, with recoverable state.
 
-## Sandbox / 沙箱
+## Sandbox
 
-把工具执行限制在隔离环境中（受限文件系统、网络隔离、只读模式），降低 Agent 误操作的影响面。
+Restricting tool execution to an isolated environment (limited file system, network isolation, read-only mode) to reduce the blast radius of Agent misoperations.
 
-## Trace / 运行轨迹
+## Trace
 
-一次 Agent 运行的完整结构化记录：思考、工具调用、结果、错误、完成。trace 是 Agent 的“黑匣子”。
+A complete structured record of an Agent run: thoughts, tool calls, results, errors, completion. The trace is the Agent's "black box".
 
-## Event / 事件
+## Event
 
-Trace 中的单个结构化记录。常见事件类型：think、tool_call、tool_result、error、complete。
+A single structured record within a Trace. Common event types: think, tool_call, tool_result, error, complete.
 
-## Orchestrator-Worker / 主-子编排
+## Orchestrator-Worker
 
-多 Agent 架构：主 Agent（orchestrator）拆分任务并派发给子 Agent（worker），子 Agent 独立完成后返回结果，主 Agent 汇总。
+Multi-Agent architecture: the main Agent (orchestrator) breaks down tasks and dispatches them to sub-Agents (workers), which complete independently and return results to the main Agent for aggregation.
 
 ## 12-Factor Harness
 
-本课程提出的生产级 Harness 设计方法论，共 12 条原则，覆盖 loop、工具、context、容错、权限、可观测性、编排、配置与评估。
+The production-grade Harness design methodology proposed in this course, consisting of 12 principles covering loop, tools, context, fault tolerance, permissions, observability, orchestration, configuration, and evaluation.
 
-## Config-Driven / 配置驱动
+## Config-Driven
 
-模型选择、系统提示、工具列表、安全策略等行为应外置到配置中，而不是硬编码，便于环境切换与 A/B 测试。
+Model selection, system prompts, tool lists, security policies, and other behaviors should be externalized to configuration rather than hard-coded, enabling environment switching and A/B testing.
 
-## Continuous Evaluation / 持续评估
+## Continuous Evaluation
 
-Harness 的质量不应只看 demo 是否成功，而应持续测量失败率、恢复率、任务完成率、成本与延迟。
+Harness quality should not be judged solely by whether demos succeed, but continuously measured through failure rate, recovery rate, task completion rate, cost, and latency.
 
 ## MCP / Model Context Protocol
 
-Anthropic 提出的开放标准协议（2024），用于标准化 LLM 应用与外部数据源、工具之间的上下文交换。2025-2026 年被 OpenAI、Google 等广泛采纳，成为 Agent 工具集成的行业标准。
+An open standard protocol proposed by Anthropic (2024) for standardizing context exchange between LLM applications and external data sources/tools. Widely adopted by OpenAI, Google, and others in 2025–2026, becoming the industry standard for Agent tool integration.
 
 ## A2A / Agent-to-Agent Protocol
 
-Google 提出的开放协议（2025），用于不同 Agent 之间的任务发现、能力协商和协作通信。与 MCP 互补：MCP 解决 Agent↔工具，A2A 解决 Agent↔Agent。
+An open protocol proposed by Google (2025) for task discovery, capability negotiation, and collaborative communication between different Agents. Complements MCP: MCP solves Agent↔Tool, A2A solves Agent↔Agent.
 
 ## AGENTS.md
 
-编码 Agent 的上下文文件标准（Anthropic 提出，OpenAI 等采纳），用于向 Agent 描述项目结构、规范和安全约束。相当于给 Agent 的"README"。
+A context file standard for coding Agents (proposed by Anthropic, adopted by OpenAI, etc.), used to describe project structure, conventions, and security constraints to the Agent. Essentially the Agent's "README".
 
 ## SKILL.md
 
-Agent Skill 的开放标准格式（Anthropic 提出），定义了 Agent 可以加载的技能包：指令集、工具定义、参考文档。被 OpenClaw 等平台采用。
+An open standard format for Agent Skills (proposed by Anthropic), defining skill packages that Agents can load: instruction sets, tool definitions, and reference documentation. Adopted by platforms such as OpenClaw.
 
 ## CodeAct
 
-一种 Agent 执行模式（Microsoft 推广），Agent 生成短 Python 程序并在沙箱中一次性调用多个工具，相比逐轮 tool call 可减少 52% 延迟和 64% token 消耗。
+An Agent execution mode (popularized by Microsoft) where the Agent generates short Python programs that invoke multiple tools in a sandbox at once, reducing latency by 52% and token consumption by 64% compared to round-by-round tool calls.

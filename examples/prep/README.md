@@ -1,13 +1,13 @@
-# 前置：环境与第一次 API 调用
+# Prep: Environment & First API Call
 
-## 运行方式
+## How to Run
 
 ```bash
 export ANTHROPIC_API_KEY=your_key
 python solution/first_call.py
 ```
 
-## 文件
+## Files
 
-- `starter/first_call.py`：骨架代码，留有 TODO。
-- `solution/first_call.py`：参考实现。
+- `starter/first_call.py`: Skeleton code with TODOs.
+- `solution/first_call.py`: Reference implementation.

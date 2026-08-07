@@ -1,13 +1,13 @@
-# Factor 7：Human-in-the-Loop Gates
+# Factor 7: Human-in-the-Loop Gates
 
-## 运行方式
+## How to Run
 
 ```bash
 export ANTHROPIC_API_KEY=your_key
 python solution/human_gate.py
 ```
 
-## 文件
+## Files
 
-- `starter/human_gate.py`：骨架代码，留有 TODO。
-- `solution/human_gate.py`：挂起-恢复状态机与审计日志参考实现。
+- `starter/human_gate.py`: Skeleton code with TODOs.
+- `solution/human_gate.py`: Reference implementation of suspend-resume state machine and audit log.

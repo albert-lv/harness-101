@@ -1,13 +1,13 @@
-# Factor 10：Composable Agents
+# Factor 10: Composable Agents
 
-## 运行方式
+## How to Run
 
 ```bash
 export ANTHROPIC_API_KEY=your_key
 python solution/orchestrator.py
 ```
 
-## 文件
+## Files
 
-- `starter/orchestrator.py`：骨架代码，留有 TODO。
-- `solution/orchestrator.py`：orchestrator-worker 编排器参考实现。
+- `starter/orchestrator.py`: Skeleton code with TODOs.
+- `solution/orchestrator.py`: Orchestrator-worker orchestrator reference implementation.

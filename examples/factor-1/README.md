@@ -1,13 +1,13 @@
-# Factor 1：Single Agent Loop
+# Factor 1: Single Agent Loop
 
-## 运行方式
+## How to Run
 
 ```bash
 export ANTHROPIC_API_KEY=your_key
 python solution/minimal_agent.py
 ```
 
-## 文件
+## Files
 
-- `starter/minimal_agent.py`：骨架代码，留有 TODO。
-- `solution/minimal_agent.py`：约 100 行的最小 Agent 参考实现。
+- `starter/minimal_agent.py`: Skeleton code with TODOs.
+- `solution/minimal_agent.py`: ~100-line minimal Agent reference implementation.
