@@ -164,6 +164,7 @@ Suggested pace: Prerequisite + F1-F3 in about two weeks, F4-F7 in about three to
 - **Loop detection**: the canonical non-stop failure mode. Detect repeated identical tool calls (same tool + same arguments N times), diminishing returns (each new turn adds no new information), and similar-content loops (the model paraphrases itself without making progress).
 - **Error-threshold circuit breaking**: consecutive tool errors beyond a threshold trip a breaker — stop the run and surface the failure instead of letting the model retry forever.
 - **Termination policy as one module**: centralize every stop condition (explicit done, max steps, repetition, error threshold) in a single policy function the loop consults each turn. Reference implementation: nano-agent's turn termination policy (`pkg/agent/turn_policy.go`).
+- **Boundary with F8**: F4 governs a single run — when the loop stops and why. Whether the *task* is complete across runs, and whether to keep working, is the outer control loop's decision: F8's goal evaluator consumes these termination signals rather than re-implementing them.
 
 **Hands-on Exercises**
 - Instrument your F1-F3 Agent to log *why* each run ended (explicit done / implicit stop / max steps / repetition / error threshold). Run 10 tasks and look at the distribution — you will be surprised.
@@ -254,6 +255,7 @@ Suggested pace: Prerequisite + F1-F3 in about two weeks, F4-F7 in about three to
   - The evaluator is the key piece: "done" is checked against machine-verifiable criteria, not the model's self-assessment — F4's "verify done claims" generalized into a control mode.
   - Reference: nano-agent's `/goal` command.
 - **The two compose**: a common pattern is plan mode first (human approves the approach), then goal mode execution (the Agent runs to the finish line without further interruption).
+- **Boundary with F4**: the goal evaluator sits one layer above the run-level termination policy. Each run still ends via F4's mechanisms (explicit done, loop detection, error breaker); the evaluator then judges the accumulated result against the declared criteria and decides whether to continue, re-plan, or stop.
 
 **Hands-on Exercises**
 - Add a plan mode: a read-only flag that blocks write tools, plus an explicit "present plan → wait for approval → unlock execution" state transition.
