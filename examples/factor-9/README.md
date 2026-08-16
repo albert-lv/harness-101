@@ -1,14 +1,18 @@
-# Factor 9: Reproducible Runs
+# Factor 9: Workspace & Artifacts Management
+
+Every task runs in an isolated workspace (git baseline, lifecycle hooks, cleanup policy), and artifacts are the persistent output contract of a run: collected from the workspace, persisted with a manifest, downloadable, and renderable in a UI.
+
+Reference implementation: nano-symphony's workspace and unified artifact management.
 
 ## How to Run
 
 ```bash
-python solution/replay.py
+python solution/workspace.py
 ```
 
-> This Factor demonstrates how to reproduce a run using trace + config.
+> Pure standard library (uses `git` via `subprocess` for the baseline). No API key required.
 
 ## Files
 
-- `starter/replay.py`: Skeleton code with TODOs.
-- `solution/replay.py`: Reference implementation of trace replay and regression testing.
+- `starter/workspace.py`: Skeleton code with TODOs.
+- `solution/workspace.py`: Reference implementation — isolated per-task workspace with git baseline and lifecycle hooks, plus artifact collection with a manifest.

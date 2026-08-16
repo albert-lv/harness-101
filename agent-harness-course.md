@@ -58,19 +58,19 @@ This course **builds the Agent first, then upgrades it to a Harness**, giving yo
 | F1 | Single Agent Loop | 100-line minimal Agent | Module 1 |
 | F2 | Explicit Tool Contract | A robust set of tool interfaces | Module 2 |
 | F3 | Context Budgeting | An Agent that won't blow up its context | Module 3 |
-| F4 | Failure-First Design | An Agent that can recover from errors | Module 4 (upper) |
-| F5 | Graceful Degradation | An Agent that degrades rather than crashes when model/tool fails | Module 4 (lower) |
-| F6 | Least-Privilege Tooling | An Agent with confirmation gates for dangerous operations | Module 5 (upper) |
+| F4 | Knowing When to Stop | A centralized turn termination policy: explicit done, loop detection, error circuit breaker | New |
+| F5 | Failure-First Design & Graceful Degradation | An Agent that recovers from errors and degrades rather than crashes | Module 4 |
+| F6 | Permission Models | A graduated permission model: confirm-all → allowlist → auto → YOLO, with audit log | Module 5 (upper) |
 | F7 | Human-in-the-Loop Gates | Irreversible operations require human confirmation, recoverable | Module 5 (lower) |
-| F8 | Observable by Default | An Agent that can be fully debugged | Module 6 (upper) |
-| F9 | Reproducible Runs | Reproduce a run using a trace | Module 6 (lower) |
+| F8 | Plan & Goal Modes | Read-only plan mode gated by approval + goal mode with completion evaluator | New |
+| F9 | Workspace & Artifacts Management | Per-task isolated workspaces (git baseline) and durable artifact bundles | New |
 | F10 | Composable Agents | Master-sub-agent orchestrator | Module 7 |
-| F11 | Config-Driven Behavior | Model/prompt/tool/strategy configuration externalized | New |
-| F12 | Continuous Evaluation | A Harness that can be quantitatively evaluated | New |
+| F11 | Config-Driven & Reproducible Runs | Behavior externalized to config; failed runs replayable and regression-tested | Module 6 (lower) + New |
+| F12 | Observability & Continuous Evaluation | Full trace per run + quantitative metrics from batch evaluation | Module 6 (upper) + New |
 | Advanced | Reading Real Harnesses | A source-code deep-dive note | Module 8 |
 | Wrap-up | A complete domain Agent | Comprehensive application of 12-Factor | Capstone project |
 
-Suggested pace: Prerequisite + F1-F3 in about two weeks, F4-F7 in about three to four weeks (F4-F5 are the most critical — don't rush), F8-F12 + Advanced + Capstone project as interest-driven extensions.
+Suggested pace: Prerequisite + F1-F3 in about two weeks, F4-F7 in about three to four weeks (F4 and F5 are the most critical — don't rush), F8-F12 + Advanced + Capstone project as interest-driven extensions.
 
 ---
 
@@ -154,63 +154,71 @@ Suggested pace: Prerequisite + F1-F3 in about two weeks, F4-F7 in about three to
 
 ---
 
-# F4: Failure-First Design
+# F4: Knowing When to Stop
 
-**Learning Goal**: Where Harness Engineering truly begins. Systematically identify and fix Agent failure modes.
+**Learning Goal**: An Agent that never stops is as broken as one that never starts. Give the loop a principled, centralized termination policy.
 
 **Core Content**
-- **Infinite loops**: tool repeatedly errors, model repeatedly retries the same action. How to detect and break (max steps, repeat detection).
-- **Drift**: in multi-step tasks the Agent deviates from the goal. How to pull it back with phased goals, self-checks, and human intervention.
-- **Hallucinated calls**: the model calls a nonexistent tool, or fabricates parameters. Intercept and correct at the Harness layer.
-- **Partial failure recovery**: in a multi-step task when one step fails, how to continue instead of starting over.
-- **Retry and backoff**: API rate limits, timeouts — the most familiar part for network/backend engineers, directly transfer your experience.
+- **Explicit vs implicit completion**: a turn ends either because the model calls a `task_done` tool with a result summary (explicit, verifiable), or because it simply stops requesting tools (`finish_reason: stop`, implicit). Implicit completion conflates "finished" with "gave up" and "ran out of ideas" — prefer explicit.
+- **Verify "done" claims**: when the model declares completion, the Harness checks the claim — did the tests it says it ran actually run? Does the file it says it wrote actually exist? A cheap verification pass catches the classic "declared success, actually failed" outcome.
+- **Loop detection**: the canonical non-stop failure mode. Detect repeated identical tool calls (same tool + same arguments N times), diminishing returns (each new turn adds no new information), and similar-content loops (the model paraphrases itself without making progress).
+- **Error-threshold circuit breaking**: consecutive tool errors beyond a threshold trip a breaker — stop the run and surface the failure instead of letting the model retry forever.
+- **Termination policy as one module**: centralize every stop condition (explicit done, max steps, repetition, error threshold) in a single policy function the loop consults each turn. Reference implementation: nano-agent's turn termination policy (`pkg/agent/turn_policy.go`).
 
 **Hands-on Exercises**
-- Artificially manufacture each type of failure: make tools error, inject rate limits, give a nonexistent tool name.
-- Write Harness guards for each failure: max step limit, repeat action detection, unknown tool interception, API retry.
-- Run a real multi-step task, record where it drifts, and improve.
+- Instrument your F1-F3 Agent to log *why* each run ended (explicit done / implicit stop / max steps / repetition / error threshold). Run 10 tasks and look at the distribution — you will be surprised.
+- Add a `task_done(result_summary)` tool and require explicit completion; compare task success rate against implicit `finish_reason` termination.
+- Implement a repetition detector (hash of tool name + arguments, trip at N=3) and a consecutive-error circuit breaker; deliberately poison a tool to trigger both.
 
-**Deliverable**: An Agent that can self-recover from multiple types of errors.
-**Core Takeaway**: In Agent code, "making it work" is only 20%; "making it not crash when things go wrong" is 80% — this is Harness Engineering.
+**Deliverable**: An Agent with a centralized turn termination policy that stops on verified completion, detected loops, and error storms.
+**Key Takeaway**: "Done" is a Harness decision, not a model mood — every run should end for an explicit, logged reason.
 
 ---
 
-# F5: Graceful Degradation
+# F5: Failure-First Design & Graceful Degradation
 
-**Learning Goal**: When the model or tools fail, the system degrades rather than crashes.
+**Learning Goal**: Where Harness Engineering truly begins. Systematically identify failure modes, recover from them — and when recovery fails, degrade rather than crash.
 
 **Core Content**
+- **Failure-first taxonomy**: hallucinated calls (nonexistent tool, fabricated parameters), partial failure mid-task, API rate limits and timeouts, goal drift in long tasks. Build a guard for each: unknown-tool interception at the Harness layer, checkpoint-and-continue instead of starting over, retry with backoff, phased goals and self-checks to pull a drifting Agent back.
 - **Degradation strategy pyramid**: full success → partial success → return approximate result → return safe fallback → graceful failure.
 - **Model-side degradation**: when the model refuses/rambles, retry with a simpler prompt, a smaller model, or a preset template.
 - **Tool-side degradation**: when a tool times out/exceptions, return "this tool is unavailable" and let the model find another path.
 - **Partial results are valuable**: in multi-step tasks, completed portions should be preserved, not all discarded.
 - **User-visible degradation**: when the Agent cannot complete, give a clear status explanation rather than a stack trace.
+- **Relationship to F4**: the termination policy decides *when* to stop; degradation decides *what to return* when you stop early.
 
 **Hands-on Exercises**
-- Add a "degradation mode" switch to F4's Agent.
-- Simulate a tool being completely unavailable, observe whether the Agent can provide an alternative or partial result.
+- Artificially manufacture each type of failure: make tools error, inject rate limits, give a nonexistent tool name.
+- Write Harness guards for each: unknown tool interception, API retry with backoff, checkpoint-based partial recovery. (Max steps and repeat detection already live in F4's termination policy.)
+- Add a "degradation mode" switch; simulate a tool being completely unavailable and observe whether the Agent can provide an alternative or partial result.
 - Design a "safe fallback response" for when the model repeatedly rambles.
 
-**Deliverable**: An Agent that degrades rather than crashes in the face of failure.
+**Deliverable**: An Agent that self-recovers from multiple types of errors and degrades gracefully instead of crashing.
+**Key Takeaway**: In Agent code, "making it work" is only 20%; "making it not crash when things go wrong" is 80% — this is Harness Engineering.
 
 ---
 
-# F6: Least-Privilege Tooling
+# F6: Permission Models
 
-**Learning Goal**: Let the Agent safely touch the real world. The security core of Harness.
+**Learning Goal**: Let the Agent safely touch the real world — with a graduated permission model that trades safety against efficiency, not a binary allow/deny.
 
 **Core Content**
-- **Why it's needed**: Agents autonomously decide actions; a wrong write operation could delete data or change production configs.
-- **Tool allowlist**: which tools are callable, in what context they are callable.
-- **Sandbox execution**: run tools in an isolated environment (restricted filesystem, network isolation, read-only mode).
-- **Principle of least privilege**: read-only by default, write operations explicitly authorized — same mindset as firewall ACLs.
+- **Least privilege first**: read-only by default, write operations explicitly authorized. Tool allowlists define which tools are callable in which context; sandboxed execution (restricted filesystem, network isolation) bounds the blast radius. Same mindset as firewall ACLs.
+- **The safety–efficiency spectrum**: per-call confirmation is safest and slowest; full auto is fastest and most dangerous. Real Harnesses live in the middle. The typical ladder:
+  - **Confirm every call**: each side-effecting tool call pauses for human approval (mechanics in F7).
+  - **Session allowlist**: once the user approves a class of operations ("allow all file edits this session"), stop re-asking.
+  - **Auto mode**: a two-level classifier auto-approves low-risk calls — a fast rule pass (edits inside the working directory take the fast path, read-only commands auto-pass) and a stricter check for the rest; unknown or ambiguous cases fall back to confirmation. It needs a configurable failure policy (fail-closed vs fail-open) and a hard timeout (e.g. 15s — a classifier that hangs must not hang the Agent).
+  - **YOLO**: everything auto-approved. Fine for throwaway sandboxes and demos; never on real data.
+- **Audit log in every mode**: who approved, auto-approved, or denied what, when, and under which rule. When something goes wrong in auto mode, the audit log is your only forensics.
+- **Reference**: nano-agent's `docs/development/PERMISSION_AUTO_APPROVAL.md` and `PERMISSION_POLICY.md` show a production shape of this spectrum.
 
 **Hands-on Exercises**
-- Add a human confirmation gate to tools with side effects; only execute after confirmation.
-- Implement a "read-only mode" switch: when enabled, all write operations are directly intercepted by the Harness.
-- Write your Agent's "permission model": which operations auto-approve, which must confirm, which are permanently forbidden.
+- Implement the ladder as four modes on your Agent: confirm-all / session allowlist / auto / YOLO.
+- In auto mode, implement the two-level classifier: workdir edit fast-path + read-only auto-pass + fallback to confirmation, with a 15s timeout and a fail-closed policy.
+- Write every decision (mode, rule hit, approver, latency) to an audit log; run a task in auto mode and reconstruct its full permission history from the log.
 
-**Deliverable**: An Agent where dangerous operations require human confirmation and defaults to least privilege.
+**Deliverable**: An Agent with a graduated permission model — least privilege by default, configurable auto-approval, complete audit trail.
 
 ---
 
@@ -234,42 +242,50 @@ Suggested pace: Prerequisite + F1-F3 in about two weeks, F4-F7 in about three to
 
 ---
 
-# F8: Observable by Default
+# F8: Plan & Goal Modes
 
-**Learning Goal**: Without trace, you cannot debug the Agent. Make every step of the Agent visible, replayable.
+**Learning Goal**: Two control modes above the raw loop — plan mode forces the Agent to think before it acts; goal mode lets it keep acting until a declared finish line is met.
 
 **Core Content**
-- **Why it's essential**: Agents are non-deterministic; the same input may take different paths. When things go wrong you need to know "what it was thinking, what it called, what it saw at the time." The Agent equivalent of packet capture.
-- **Event model**: emit every step of the loop as a structured event (start thinking / decide to call tool / tool returns / error / complete).
-- **Structured logging**: record each step's input/output, token consumption, time spent.
-- **Replay and debugging**: how to reproduce an Agent run using the recorded trace.
-- Cost and latency observability: how many tokens, how much money, how much time per task.
+- **Plan mode**: explore → produce a plan → human reviews → execute. Until the plan is approved, the Agent is read-only: it can search, read, and investigate, but every mutating tool is blocked. Approval is a hard state transition enforced by the Harness, not a prompt-level suggestion.
+  - Why it works: most Agent disasters come from acting on a wrong understanding of the task. A wrong plan is cheap to fix; wrong actions are expensive to undo.
+  - Reference: nano-agent's `docs/features/PLAN_MODE.md`; nano-symphony's plan runs with approval gates.
+- **Goal mode**: the user declares an objective plus explicit completion criteria ("all tests pass and the diff is under 200 lines"); the Agent then runs autonomously, and a **goal evaluator** checks the criteria after each turn — not met, keep going (within F4's termination limits); met, stop and report.
+  - The evaluator is the key piece: "done" is checked against machine-verifiable criteria, not the model's self-assessment — F4's "verify done claims" generalized into a control mode.
+  - Reference: nano-agent's `/goal` command.
+- **The two compose**: a common pattern is plan mode first (human approves the approach), then goal mode execution (the Agent runs to the finish line without further interruption).
 
 **Hands-on Exercises**
-- Add an event emission layer to the Agent loop, writing each step as structured logs (JSON lines).
-- Write a simple viewer that prints a run's trace as a readable timeline.
-- Use the trace to debug a previously drifting task, pinpointing which step went wrong.
+- Add a plan mode: a read-only flag that blocks write tools, plus an explicit "present plan → wait for approval → unlock execution" state transition.
+- Add a goal mode: accept an objective + completion criteria, implement a simple evaluator (e.g. run a test command and parse the exit code), and loop until the evaluator passes or F4's circuit breakers trip.
+- Compose them: run a task that plans in read-only mode, gets approved, then executes to a goal criterion.
 
-**Deliverable**: An Agent that produces a complete readable trace on every run.
+**Deliverable**: An Agent with a read-only plan mode gated by human approval, and a goal mode that self-continues until verifiable criteria are met.
+**Key Takeaway**: Autonomy is a dial — plan mode turns it down at the start, goal mode turns it up during execution, and both are enforced by the Harness, not the prompt.
 
 ---
 
-# F9: Reproducible Runs
+# F9: Workspace & Artifacts Management
 
-**Learning Goal**: Given a trace and configuration, reproduce or locate a failed run.
+**Learning Goal**: Every task runs in an isolated workspace; every run leaves behind durable, inspectable artifacts. Make the Agent's footprint on the machine manageable.
 
 **Core Content**
-- **Three elements of reproduction**: trace + config + seed (or at least model/temperature).
-- **Determinism boundaries**: the LLM itself is not fully deterministic, but loop paths, tool calls, and failure points can be reproduced.
-- **Regression testing**: turn a failed trace into a test case, verifying that after a fix the same class of failure no longer occurs.
-- **Replay mode**: use an old trace to replace real model calls, quickly verifying Harness behavior.
+- **Per-task isolated workspace**: each task gets its own working directory (or git worktree / container), so concurrent or consecutive runs don't contaminate each other — and so "what did the Agent change?" has a well-defined answer.
+  - **Git baseline**: initialize from or branch off a known commit; the Agent's entire effect is `git diff` against the baseline. This isolation is also what makes runs comparable and — combined with F11 — reproducible.
+  - **Lifecycle hooks**: setup (install dependencies, seed fixtures) and teardown (archive, clean up) run as part of workspace management, not inside the Agent loop.
+  - **Cleanup policy**: keep-on-failure vs delete-on-success, TTL for stale workspaces, disk budget.
+- **Artifacts as the durable output contract**: context is ephemeral; artifacts are not. Define what a run must produce — patches, reports, logs, traces, test output — then collect, persist, and expose them for download and UI display.
+  - Artifacts decouple "what the Agent did" from "what the Agent said": review the diff, not the chat log.
+  - Reference: nano-symphony's per-task workspaces and unified artifacts management.
+- **Why this is a Factor**: without isolated workspaces, parallel Agents (F10) corrupt each other; without artifacts, evaluation (F12) has nothing to grade and humans have nothing to review.
 
 **Hands-on Exercises**
-- Save the complete trace + config of a failed run.
-- Implement replay mode: read the trace, skip model calls, advance the loop according to the record, verifying Harness interception/recovery logic.
-- Write a test: given a certain failed trace, the Agent must trigger degradation at step N.
+- Give each task its own workspace: create a temp directory or git worktree per run, snapshot a baseline, and after the run print the full diff of the Agent's changes.
+- Add lifecycle hooks: a `setup.sh` that prepares the workspace and a teardown step that archives results.
+- Define an artifact manifest for your Agent (e.g. `diff.patch`, `report.md`, `trace.jsonl`); write a collector that assembles them into a durable output directory per run.
 
-**Deliverable**: An Agent where failures can be reproduced from trace and fixes can be tested.
+**Deliverable**: An Agent where every run is workspace-isolated, diffable against a git baseline, and leaves behind a well-defined artifact bundle.
+**Key Takeaway**: A run is not its conversation — it is the diff it made and the artifacts it left behind.
 
 ---
 
@@ -289,46 +305,44 @@ Suggested pace: Prerequisite + F1-F3 in about two weeks, F4-F7 in about three to
 **Hands-on Exercises**
 - Implement a master Agent that can split a task into sub-tasks, each delegated to a sub-Agent.
 - Implement parallel execution of multiple sub-Agents and aggregate results (e.g. parallel research on multiple topics / parallel diagnosis of multiple devices).
-- Reuse F8's trace so that every sub-agent of the orchestrator is observable.
+- Reuse F12's trace so that every sub-agent of the orchestrator is observable.
 
 **Deliverable**: An orchestrator that can dispatch sub-tasks in parallel and aggregate results.
 
 ---
 
-# F11: Config-Driven Behavior
+# F11: Config-Driven & Reproducible Runs
 
-**Learning Goal**: Externalize model, prompt, tool list, and security policy to configuration; make Harness behavior switchable and testable.
+**Learning Goal**: Externalize model, prompt, tool list, and policy to configuration — then use config + trace + workspace baseline to reproduce any run.
 
 **Core Content**
-- **What belongs in config**: model name, temperature, max_tokens, system prompt, tool list, security policy, confirmation gate threshold, degradation strategy.
-- **Config format**: YAML/JSON/TOML, split by environment (dev / staging / prod).
-- **Dynamic reload**: switch config without restarting the process (optional, depending on scenario).
-- **A/B testing**: run the same batch of tasks with different configs, comparing completion rate and cost.
-- **Config as contract**: config changes should trigger automated tests, ensuring loop behavior remains unchanged.
+- **Config as behavior contract**: model name, temperature, max_tokens, system prompt, tool list, permission mode (F6), termination thresholds (F4), degradation strategy (F5), workspace policy (F9) all live in config (YAML/JSON/TOML, split by environment: dev / staging / prod).
+- **Config changes trigger tests**: a config edit is a behavior change — run regression before shipping it. A/B test configs on the same batch of tasks, comparing completion rate and cost.
+- **Three elements of reproduction**: trace (F12) + config + workspace baseline (F9). The LLM itself is not fully deterministic, but loop paths, tool calls, and failure points are reproducible given these three.
+- **Replay mode**: feed a recorded trace in place of live model calls to advance the loop deterministically — verify Harness interception/recovery logic quickly, without paying for tokens.
+- **Regression testing from failures**: turn a failed trace into a test case ("given this trace, the Agent must trip the circuit breaker at step N"). Workflow templates and checkpoints pin long tasks into reproducible segments.
 
 **Hands-on Exercises**
-- Extract all hardcoded parameters from previous chapters (model, prompt, tool list, max_steps, permission policy) into a `config.yaml`.
-- Write two configs: an "aggressive mode" (auto-confirm low-risk writes) and a "conservative mode" (all writes require human confirmation).
-- Run the same task with both configs, observe behavioral differences.
+- Extract all hardcoded parameters from previous chapters (model, prompt, tool list, termination thresholds, permission policy) into a `config.yaml`.
+- Write two configs: an "aggressive mode" (auto permission mode) and a "conservative mode" (confirm-all). Run the same task with both and observe the behavioral differences.
+- Save the complete trace + config + workspace baseline of a failed run; implement replay mode that skips model calls and reproduces the failure. Turn it into a regression test, fix the Harness, and show the test now passes.
 
-**Deliverable**: A Harness whose behavior is fully driven by configuration.
+**Deliverable**: A Harness whose behavior is fully config-driven, and where any failed run can be replayed and regression-tested.
 
 ---
 
-# F12: Continuous Evaluation
+# F12: Observability & Continuous Evaluation
 
-**Learning Goal**: Harness quality should not be judged by whether the demo works, but measured continuously with metrics.
+**Learning Goal**: Without trace you cannot debug the Agent; without metrics you cannot improve it. Events, metrics, and traces are the data foundation that continuous evaluation is built on.
 
 **Core Content**
-- **Why it's needed**: a successful demo doesn't mean reliability; failure rate, recovery rate, and cost must be measured over many tasks.
-- **Core metrics**:
-  - Task completion rate
-  - Failure rate
-  - Recovery rate (proportion pulled back by Harness after failure)
-  - Average steps / tokens / latency / cost
-  - Human-in-the-loop rate
-- **Evaluation dataset**: collect real tasks and known failure cases for periodic regression.
-- **Evaluation harness**: write a runner that batch-runs tasks, automatically judges success/failure, and outputs a report.
+- **Observable by default**: Agents are non-deterministic; when things go wrong you need to know "what it was thinking, what it called, what it saw at the time." Emit every loop step as a structured event (start thinking / tool call / tool result / error / done — including the F4 termination reason), with tokens, cost, and latency per step. The Agent equivalent of packet capture.
+- **Replay and debugging**: use the trace to reconstruct a run's timeline and pinpoint the exact step where it drifted.
+- **From observability to evaluation**: traces from many runs aggregate into the metrics that actually measure Harness quality:
+  - Task completion rate / failure rate / recovery rate (proportion pulled back by the Harness after failure)
+  - Termination reason distribution: how often explicit done vs loop-detected vs circuit-broken (F4)
+  - Average steps / tokens / latency / cost; human-in-the-loop rate (F6/F7)
+- **Evaluation harness**: a runner that batch-executes a task dataset, automatically judges success/failure, and outputs a report. Public benchmarks like SWE-bench double as external yardsticks — re-run them on every Harness change.
 - **Evaluation tool ecosystem (2026)**:
   - **DeepEval**: pytest-compatible LLM evaluation framework, 60+ metrics, native CI/CD integration.
   - **AgentAssay**: regression testing for non-deterministic Agent workflows, using behavioral fingerprints to detect 86% of regressions (traditional binary testing: 0%).
@@ -337,11 +351,11 @@ Suggested pace: Prerequisite + F1-F3 in about two weeks, F4-F7 in about three to
 - **Designing from evaluation backwards**: whichever Factor's metrics are poor, prioritize improving that Factor.
 
 **Hands-on Exercises**
-- Prepare 10-20 representative tasks (including simple, complex, and trap cases).
-- Write an `evaluate.py` that batch-runs and records each task's completion status, step count, tokens, and whether human confirmation was triggered.
-- After modifying the Harness, rerun evaluation and see if key metrics improved.
+- Add an event emission layer to the Agent loop, writing each step as structured logs (JSON lines); write a simple viewer that prints a run's trace as a readable timeline.
+- Prepare 10-20 representative tasks (including simple, complex, and trap cases); write an `evaluate.py` that batch-runs and records each task's completion status, step count, tokens, termination reason, and whether human confirmation was triggered.
+- After modifying the Harness, rerun evaluation and see if key metrics improved; optionally run a small SWE-bench subset as an external check.
 
-**Deliverable**: A Harness that can be quantitatively evaluated and continuously improved.
+**Deliverable**: An Agent that produces a complete readable trace on every run, plus an evaluation harness that turns traces into continuously tracked metrics.
 
 ---
 
@@ -359,14 +373,15 @@ Suggested pace: Prerequisite + F1-F3 in about two weeks, F4-F7 in about three to
   - **Temporal.io + Agent Orchestration**: persistent Agent workflows, learn how distributed system retry, state machines, and activity monitoring apply to Agents.
 - Read with specific questions, not from beginning to end:
   - How does it manage context? (F3)
-  - How does it handle tool errors and infinite loops? (F4/F5)
-  - What does its permission/sandbox model look like? (F6/F7)
-  - How is its trace/events designed? (F8/F9)
+  - How does it decide when to stop, and how does it handle tool errors? (F4/F5)
+  - What does its permission model look like, and where does it sit on the safety–efficiency spectrum? (F6/F7)
+  - Does it have plan mode / goal mode or equivalents, and how are they enforced? (F8)
+  - How does it isolate workspaces and manage run artifacts? (F9)
   - How does it do sub-agent / orchestration? (F10)
-  - What do its config and evaluation look like? (F11/F12)
+  - What do its config, replay, and evaluation look like? (F11/F12)
 
 **Hands-on Exercises**
-- Pick a real Harness and write a deep-reading note for each of the 6 questions above.
+- Pick a real Harness and write a deep-reading note for each of the questions above.
 - Pick one design you think it does better than yours, and port it into your own Agent.
 
 **Deliverable**: A source-code deep-reading note, plus at least one improvement to your own Agent.
@@ -386,15 +401,15 @@ Combine all Factors into a truly problem-solving Agent. Pick a real task from yo
 - [ ] **F1** Handwritten agent loop (not relying on heavy frameworks)
 - [ ] **F2** A set of tools with validation and graceful error returns
 - [ ] **F3** Context management strategy, long tasks don't crash
-- [ ] **F4** Failure recovery: can handle tool errors, infinite loops, rate limits
-- [ ] **F5** Degradation strategy: doesn't crash when model/tool fails
-- [ ] **F6** Permission model: dangerous operations require confirmation, defaults to least privilege
+- [ ] **F4** Termination policy: explicit completion, loop detection, error circuit breaker
+- [ ] **F5** Failure recovery and graceful degradation: doesn't crash when model/tool fails
+- [ ] **F6** Graduated permission model with auto-approval rules and audit log
 - [ ] **F7** Human confirmation gate with suspend-resume
-- [ ] **F8** Complete trace: every run is replayable and debuggable
-- [ ] **F9** Failed runs can be reproduced / regression tested
+- [ ] **F8** Plan mode (read-only until approved) and/or goal mode with completion evaluator
+- [ ] **F9** Isolated per-task workspaces and durable artifact bundles
 - [ ] **F10** (Advanced) Multi-agent orchestration
-- [ ] **F11** Key behavior driven by configuration
-- [ ] **F12** Quantitative evaluation metrics and test suite
+- [ ] **F11** Behavior driven by configuration; failed runs reproducible and regression-tested
+- [ ] **F12** Complete trace per run + quantitative evaluation metrics and test suite
 
 ---
 
@@ -548,7 +563,7 @@ Each Factor directory should contain: `README.md` (lecture notes), `starter/` (s
 | Tool | Purpose | Course Correlation |
 |---|---|---|
 | **DeepEval** | pytest-compatible LLM evaluation framework, 60+ metrics | F12 |
-| **AgentAssay** | Non-deterministic Agent regression testing, behavioral fingerprints | F9/F12 |
+| **AgentAssay** | Non-deterministic Agent regression testing, behavioral fingerprints | F11/F12 |
 | **promptfoo** | Declarative prompt testing + red-teaming, 50+ vulnerability plugins | F2/F12 |
 | **RAGAS** | RAG / Agent quality evaluation | F12 |
 

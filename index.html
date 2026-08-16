@@ -287,15 +287,15 @@
         <a href="#factor-1">F1 Agent Loop</a>
         <a href="#factor-2">F2 Tool Contract</a>
         <a href="#factor-3">F3 Context</a>
-        <a href="#factor-4">F4 Failure-First</a>
-        <a href="#factor-5">F5 Graceful Degradation</a>
-        <a href="#factor-6">F6 Least Privilege</a>
+        <a href="#factor-4">F4 When to Stop</a>
+        <a href="#factor-5">F5 Failure &amp; Degradation</a>
+        <a href="#factor-6">F6 Permission Models</a>
         <a href="#factor-7">F7 Human-in-the-Loop</a>
-        <a href="#factor-8">F8 Observability</a>
-        <a href="#factor-9">F9 Reproducibility</a>
+        <a href="#factor-8">F8 Plan &amp; Goal</a>
+        <a href="#factor-9">F9 Workspace &amp; Artifacts</a>
         <a href="#factor-10">F10 Composable</a>
-        <a href="#factor-11">F11 Config-Driven</a>
-        <a href="#factor-12">F12 Evaluation</a>
+        <a href="#factor-11">F11 Config &amp; Repro</a>
+        <a href="#factor-12">F12 Observability &amp; Eval</a>
         <a href="#advanced">Advanced</a>
         <a href="#capstone">Capstone</a>
         <a href="#appendix">Appendix</a>
@@ -317,15 +317,15 @@
               <tr><td>F1</td><td>Single Agent Loop</td><td>100-line minimal Agent</td></tr>
               <tr><td>F2</td><td>Explicit Tool Contract</td><td>Robust tool interfaces</td></tr>
               <tr><td>F3</td><td>Context Budgeting</td><td>Agent that won't blow up its context</td></tr>
-              <tr><td>F4 <span class="star">★</span></td><td>Failure-First Design</td><td>Recoverable Agent</td></tr>
-              <tr><td>F5</td><td>Graceful Degradation</td><td>Degrades instead of crashes</td></tr>
-              <tr><td>F6</td><td>Least-Privilege Tooling</td><td>Least privilege + allowlist</td></tr>
+              <tr><td>F4 <span class="star">★</span></td><td>Knowing When to Stop</td><td>Stops on completion, loops, or error thresholds</td></tr>
+              <tr><td>F5</td><td>Failure-First Design &amp; Graceful Degradation</td><td>Recoverable, degradable Agent</td></tr>
+              <tr><td>F6</td><td>Permission Models</td><td>Tiered permissions + audit log</td></tr>
               <tr><td>F7</td><td>Human-in-the-Loop Gates</td><td>Recoverable confirmation gate</td></tr>
-              <tr><td>F8</td><td>Observable by Default</td><td>Replayable trace</td></tr>
-              <tr><td>F9</td><td>Reproducible Runs</td><td>Failures reproducible / regressable</td></tr>
+              <tr><td>F8</td><td>Plan &amp; Goal Modes</td><td>Approved plans and goal-driven runs</td></tr>
+              <tr><td>F9</td><td>Workspace &amp; Artifacts Management</td><td>Isolated workspace + persistent artifacts</td></tr>
               <tr><td>F10</td><td>Composable Agents</td><td>Master-sub orchestrator</td></tr>
-              <tr><td>F11</td><td>Config-Driven Behavior</td><td>Config-driven Harness</td></tr>
-              <tr><td>F12</td><td>Continuous Evaluation</td><td>Quantitative evaluation</td></tr>
+              <tr><td>F11</td><td>Config-Driven &amp; Reproducible Runs</td><td>Config-fixed, replayable runs</td></tr>
+              <tr><td>F12</td><td>Observability &amp; Continuous Evaluation</td><td>Trace-driven quantitative evaluation</td></tr>
             </tbody>
           </table>
         </section>
@@ -350,233 +350,74 @@
 
         <section id="factor-1">
           <h2>Factor 1: Single Agent Loop</h2>
-          <div class="goal-card"><strong>Learning Goal:</strong> Implement a tool-equipped REPL loop and understand that Agent is a state machine.</div>
-          <h3>Core Content</h3>
-          <ul>
-            <li><code>Call model → Parse tool call → Execute tool → Feed result back into context</code> until done.</li>
-            <li>Tool calling protocol (name/description/parameter schema).</li>
-            <li>Parse tool_use and map to Python functions.</li>
-            <li>Loop terminates when model no longer requests tools.</li>
-          </ul>
-          <h3>Hands-on Exercises</h3>
-          <ol class="exercise-list">
-            <li>Implement the loop in about 100 lines without any framework.</li>
-            <li>Register the first tool (e.g. <code>run_command</code> / file read / calculator).</li>
-            <li>Complete a 2-3 step tool-calling task and print each step's action.</li>
-          </ol>
-          <div class="output-card"><strong>Deliverable:</strong> A minimal but complete multi-step Agent.</div>
+          <div class="goal-card">The Agent is a state machine: call the model → parse the tool call → execute the tool → feed the result back into context, looping until done.</div>
+          <p class="muted">Example: <a href="examples/factor-1/">examples/factor-1</a></p>
         </section>
 
         <section id="factor-2">
           <h2>Factor 2: Explicit Tool Contract</h2>
-          <div class="goal-card"><strong>Learning Goal:</strong> Design tool interfaces that the model uses correctly and reliably.</div>
-          <h3>Core Content</h3>
-          <ul>
-            <li>Tool description itself is prompt.</li>
-            <li>Parameter validation must be done inside the tool.</li>
-            <li>Return values should help the model continue making decisions.</li>
-            <li>Return errors as normal values; avoid crashing the loop.</li>
-            <li>Tools with side effects must consider idempotency.</li>
-          </ul>
-          <h3>Hands-on Exercises</h3>
-          <ol class="exercise-list">
-            <li>Refactor Factor 1 tools, add parameter validation and friendly errors.</li>
-            <li>Design a tool with side effects and prevent repeated execution.</li>
-            <li>Deliberately write a vague description and observe misuse.</li>
-          </ol>
-          <div class="output-card"><strong>Deliverable:</strong> A robust tool specification + 2-3 example tools.</div>
+          <div class="goal-card">Tool descriptions are prompts, parameters are validated inside the tool, and errors return as normal values so the model can keep making decisions.</div>
+          <p class="muted">Example: <a href="examples/factor-2/">examples/factor-2</a></p>
         </section>
 
         <section id="factor-3">
           <h2>Factor 3: Context Budgeting</h2>
-          <div class="goal-card"><strong>Learning Goal:</strong> Handle the context overflow problem.</div>
-          <h3>Core Content</h3>
-          <ul>
-            <li>Long tasks and large tool outputs quickly fill the window.</li>
-            <li>Strategies: truncation, summarization, external memory.</li>
-            <li>Tradeoffs between information loss and cost.</li>
-            <li>Distinguish permanent system prompt from dynamically injected information.</li>
-          </ul>
-          <h3>Hands-on Exercises</h3>
-          <ol class="exercise-list">
-            <li>Use an ultra-long output tool to reproduce context overflow.</li>
-            <li>Implement truncation and threshold summarization strategies.</li>
-            <li>Compare task quality impact of the two strategies.</li>
-          </ol>
-          <div class="output-card"><strong>Deliverable:</strong> An Agent that remains stable under long tasks.</div>
+          <div class="goal-card">Truncation, summarization, and external memory keep long tasks and large tool outputs from blowing up the context window.</div>
+          <p class="muted">Example: <a href="examples/factor-3/">examples/factor-3</a></p>
         </section>
 
         <section id="factor-4">
-          <h2>Factor 4: Failure-First Design <span class="star">★</span></h2>
-          <div class="goal-card"><strong>Learning Goal:</strong> Systematically fix infinite loops, drift, hallucinated calls, and partial failures.</div>
-          <h3>Core Content</h3>
-          <ul>
-            <li>Infinite loop detection and breaking (max steps, repeat detection).</li>
-            <li>Phased goals and self-checks to avoid drift.</li>
-            <li>Intercept unknown tools and abnormal parameters.</li>
-            <li>Partial failure recovery in multi-step tasks.</li>
-            <li>Rate limit / timeout retry and backoff.</li>
-          </ul>
-          <h3>Hands-on Exercises</h3>
-          <ol class="exercise-list">
-            <li>Artificially inject tool errors, rate limits, and unknown tools.</li>
-            <li>Add Harness guards for each failure type.</li>
-            <li>Record where a real task drifts and improve.</li>
-          </ol>
-          <div class="output-card"><strong>Deliverable:</strong> An Agent that can recover from multiple error types.</div>
+          <h2>Factor 4: Knowing When to Stop <span class="star">★</span></h2>
+          <div class="goal-card">Define "done" explicitly (a <code>task_done</code> tool plus validation of completion claims), detect loops (repeated tool calls, diminishing returns, similar-content cycles), and trip a circuit breaker when errors cross a threshold.</div>
+          <p class="muted">Example: <a href="examples/factor-4/">examples/factor-4</a> · Reference: nano-agent turn termination policy (<code>pkg/agent/turn_policy.go</code>)</p>
         </section>
 
         <section id="factor-5">
-          <h2>Factor 5: Graceful Degradation</h2>
-          <div class="goal-card"><strong>Learning Goal:</strong> When model or tool fails, the system degrades rather than crashes.</div>
-          <h3>Core Content</h3>
-          <ul>
-            <li>Degradation strategy pyramid: full success → partial success → safe fallback → graceful failure.</li>
-            <li>When model rambles/refuses, retry with simpler prompt or preset template.</li>
-            <li>When tool is unavailable, return error and let model find another path.</li>
-            <li>Preserve completed portions in multi-step tasks.</li>
-            <li>Give users clear status explanation instead of stack traces.</li>
-          </ul>
-          <h3>Hands-on Exercises</h3>
-          <ol class="exercise-list">
-            <li>Add a "degradation mode" switch to Factor 4's Agent.</li>
-            <li>Simulate a tool completely unavailable; observe if Agent provides an alternative.</li>
-            <li>Design a safe fallback response for continuous rambling.</li>
-          </ol>
-          <div class="output-card"><strong>Deliverable:</strong> An Agent that degrades rather than crashes in the face of failure.</div>
+          <h2>Factor 5: Failure-First Design &amp; Graceful Degradation</h2>
+          <div class="goal-card">Design for failure first — infinite loops, drift, hallucinated calls, partial failures — and degrade gracefully (full success → partial success → safe fallback → graceful failure) instead of crashing.</div>
+          <p class="muted">Example: <a href="examples/factor-5/">examples/factor-5</a></p>
         </section>
 
         <section id="factor-6">
-          <h2>Factor 6: Least-Privilege Tooling</h2>
-          <div class="goal-card"><strong>Learning Goal:</strong> Let the Agent safely access the real world.</div>
-          <h3>Core Content</h3>
-          <ul>
-            <li>Tool allowlist and context-level permission control.</li>
-            <li>Sandbox execution: filesystem and network isolation.</li>
-            <li>Principle of least privilege: read-only by default, explicit authorization for writes.</li>
-            <li>Dangerous operation classification: auto-approve / must confirm / permanently forbidden.</li>
-          </ul>
-          <h3>Hands-on Exercises</h3>
-          <ol class="exercise-list">
-            <li>Implement read-only mode to intercept write operations.</li>
-            <li>Add confirmation gates to tools with side effects.</li>
-            <li>Write a permission model checklist.</li>
-          </ol>
-          <div class="output-card"><strong>Deliverable:</strong> An Agent with least privilege by default and confirmation for dangerous operations.</div>
+          <h2>Factor 6: Permission Models</h2>
+          <div class="goal-card">Least privilege by default, with a security–efficiency spectrum: per-call confirmation → session allowlist → auto mode (two-level classifier, fast path for workdir edits, configurable failure policy, 15s timeout) → YOLO — every decision audit-logged.</div>
+          <p class="muted">Example: <a href="examples/factor-6/">examples/factor-6</a> · Reference: nano-agent <code>PERMISSION_AUTO_APPROVAL.md</code> &amp; <code>PERMISSION_POLICY.md</code></p>
         </section>
 
         <section id="factor-7">
           <h2>Factor 7: Human-in-the-Loop Gates</h2>
-          <div class="goal-card"><strong>Learning Goal:</strong> Irreversible operations pause for human confirmation; state is recoverable.</div>
-          <h3>Core Content</h3>
-          <ul>
-            <li>Confirmation gate state machine: running → suspended awaiting → resumed execution → completed.</li>
-            <li>When suspended, save full context and trace; supports exit and later resume.</li>
-            <li>Batch confirmation vs single confirmation.</li>
-            <li>Timeout strategy and audit logs.</li>
-          </ul>
-          <h3>Hands-on Exercises</h3>
-          <ol class="exercise-list">
-            <li>Make confirmation an explicit state inside the loop.</li>
-            <li>Implement suspend-resume: reload state after program exit and continue execution.</li>
-            <li>Add timeout and audit events to the confirmation gate.</li>
-          </ol>
-          <div class="output-card"><strong>Deliverable:</strong> An Agent with a recoverable human confirmation gate.</div>
+          <div class="goal-card">Irreversible operations pause at a confirmation gate whose suspended state (full context and trace) is saved and can be resumed later.</div>
+          <p class="muted">Example: <a href="examples/factor-7/">examples/factor-7</a></p>
         </section>
 
         <section id="factor-8">
-          <h2>Factor 8: Observable by Default</h2>
-          <div class="goal-card"><strong>Learning Goal:</strong> Make every run visible, replayable, and debuggable.</div>
-          <h3>Core Content</h3>
-          <ul>
-            <li>Structured events: thinking, tool calling, results, errors, completion.</li>
-            <li>Structured logging: input/output, tokens, time spent.</li>
-            <li>Reproduce and troubleshoot based on trace.</li>
-            <li>Cost observability: tokens, latency, cost.</li>
-          </ul>
-          <h3>Hands-on Exercises</h3>
-          <ol class="exercise-list">
-            <li>Output JSONL event logs.</li>
-            <li>Implement a simple trace timeline viewer.</li>
-            <li>Use trace to locate the root cause of a drift.</li>
-          </ol>
-          <div class="output-card"><strong>Deliverable:</strong> An Agent whose every run can be traced and replayed.</div>
+          <h2>Factor 8: Plan &amp; Goal Modes</h2>
+          <div class="goal-card">Plan mode explores read-only, produces a plan, and executes only after human approval; goal mode declares a goal with completion criteria and keeps running autonomously until a goal evaluator says they are met.</div>
+          <p class="muted">Example: <a href="examples/factor-8/">examples/factor-8</a> · Reference: nano-agent <code>PLAN_MODE.md</code> + <code>/goal</code>; nano-symphony plan runs &amp; approval gates</p>
         </section>
 
         <section id="factor-9">
-          <h2>Factor 9: Reproducible Runs</h2>
-          <div class="goal-card"><strong>Learning Goal:</strong> Given trace and config, reproduce or locate a failed run.</div>
-          <h3>Core Content</h3>
-          <ul>
-            <li>Three elements of reproduction: trace + config + seed.</li>
-            <li>Loop paths and tool calls are reproducible; LLM output itself has randomness.</li>
-            <li>Turn failed traces into regression tests.</li>
-            <li>Replay mode: use old trace to replace real calls and quickly verify Harness.</li>
-          </ul>
-          <h3>Hands-on Exercises</h3>
-          <ol class="exercise-list">
-            <li>Save trace + config of a failed run.</li>
-            <li>Implement replay mode, advancing loop according to the record.</li>
-            <li>Write a test: given a failed trace, Agent must trigger degradation at step N.</li>
-          </ol>
-          <div class="output-card"><strong>Deliverable:</strong> An Agent where failures can be reproduced and fixes can be tested.</div>
+          <h2>Factor 9: Workspace &amp; Artifacts Management</h2>
+          <div class="goal-card">Every task runs in an isolated workspace (git baseline, lifecycle hooks, cleanup policy), and artifacts are the run's persistent output contract — collected, stored, downloadable, and rendered in the UI.</div>
+          <p class="muted">Example: <a href="examples/factor-9/">examples/factor-9</a> · Reference: nano-symphony workspace &amp; unified artifacts management</p>
         </section>
 
         <section id="factor-10">
           <h2>Factor 10: Composable Agents</h2>
-          <div class="goal-card"><strong>Learning Goal:</strong> Upgrade from single Agent to master-sub orchestrator.</div>
-          <h3>Core Content</h3>
-          <ul>
-            <li>Applicable scenarios: parallel decomposition, context isolation, role-based division.</li>
-            <li>orchestrator-worker pattern: split, dispatch, aggregate.</li>
-            <li>Parallel execution and result merge strategies.</li>
-            <li>Sub-Agent failure isolation and recovery.</li>
-          </ul>
-          <h3>Hands-on Exercises</h3>
-          <ol class="exercise-list">
-            <li>Implement a master Agent that splits tasks into sub-tasks.</li>
-            <li>Run multiple sub-Agents in parallel and aggregate results.</li>
-            <li>Reuse Factor 8 trace to support orchestration debugging.</li>
-          </ol>
-          <div class="output-card"><strong>Deliverable:</strong> A multi-Agent orchestrator that can execute in parallel and aggregate results.</div>
+          <div class="goal-card">Split, dispatch, and aggregate with an orchestrator–worker pattern, isolating and recovering sub-agent failures.</div>
+          <p class="muted">Example: <a href="examples/factor-10/">examples/factor-10</a></p>
         </section>
 
         <section id="factor-11">
-          <h2>Factor 11: Config-Driven Behavior</h2>
-          <div class="goal-card"><strong>Learning Goal:</strong> Externalize model, prompt, tool list, and security policy to configuration.</div>
-          <h3>Core Content</h3>
-          <ul>
-            <li>What belongs in config: model name, temperature, max_tokens, system prompt, tool list, security policy, etc.</li>
-            <li>Split config by environment: dev / staging / prod.</li>
-            <li>A/B test with different configs.</li>
-            <li>Config changes should trigger automated tests.</li>
-          </ul>
-          <h3>Hands-on Exercises</h3>
-          <ol class="exercise-list">
-            <li>Extract all hardcoded parameters from previous chapters into <code>config.yaml</code>.</li>
-            <li>Write "aggressive mode" and "conservative mode" configs.</li>
-            <li>Run the same task with both configs and observe behavioral differences.</li>
-          </ol>
-          <div class="output-card"><strong>Deliverable:</strong> A Harness whose behavior is fully driven by configuration.</div>
+          <h2>Factor 11: Config-Driven &amp; Reproducible Runs</h2>
+          <div class="goal-card">Config is the behavior contract; pin it with workflow templates and checkpoints so any run can be reproduced, replayed, and turned into a regression test.</div>
+          <p class="muted">Example: <a href="examples/factor-11/">examples/factor-11</a></p>
         </section>
 
         <section id="factor-12">
-          <h2>Factor 12: Continuous Evaluation</h2>
-          <div class="goal-card"><strong>Learning Goal:</strong> Measure Harness quality with metrics continuously, not just by whether the demo works.</div>
-          <h3>Core Content</h3>
-          <ul>
-            <li>Core metrics: completion rate, failure rate, recovery rate, average steps/tokens/latency/cost, human-in-the-loop rate.</li>
-            <li>Evaluation dataset: collect real tasks and known failure cases.</li>
-            <li>Batch runner that auto-judges success/failure and outputs a report.</li>
-            <li>Design from metrics backwards: whichever Factor is poor, prioritize improving it.</li>
-          </ul>
-          <h3>Hands-on Exercises</h3>
-          <ol class="exercise-list">
-            <li>Prepare 10-20 representative tasks (including trap cases).</li>
-            <li>Write <code>evaluate.py</code> to batch-run and record metrics.</li>
-            <li>After modifying Harness, rerun evaluation and see if key metrics improved.</li>
-          </ol>
-          <div class="output-card"><strong>Deliverable:</strong> A Harness that can be quantitatively evaluated and continuously improved.</div>
+          <h2>Factor 12: Observability &amp; Continuous Evaluation</h2>
+          <div class="goal-card">Events, metrics, and traces are the data foundation of evaluation — run continuous benchmarks (SWE-bench style) and prioritize whichever factor scores worst.</div>
+          <p class="muted">Example: <a href="examples/factor-12/">examples/factor-12</a></p>
         </section>
 
         <section id="advanced">
@@ -609,15 +450,15 @@
             <li><label><input type="checkbox" data-factor="f1"> F1 Handwritten agent loop (not relying on heavy frameworks)</label></li>
             <li><label><input type="checkbox" data-factor="f2"> F2 Tools with validation and graceful error returns</label></li>
             <li><label><input type="checkbox" data-factor="f3"> F3 Context management, long tasks don't crash</label></li>
-            <li><label><input type="checkbox" data-factor="f4"> F4 Failure recovery (tool errors, infinite loops, rate limits)</label></li>
-            <li><label><input type="checkbox" data-factor="f5"> F5 Degradation strategy, failures don't crash</label></li>
-            <li><label><input type="checkbox" data-factor="f6"> F6 Permission model, dangerous operations require confirmation</label></li>
+            <li><label><input type="checkbox" data-factor="f4"> F4 Knows when to stop: completion checks, loop detection, error thresholds</label></li>
+            <li><label><input type="checkbox" data-factor="f5"> F5 Failure-first design with graceful degradation</label></li>
+            <li><label><input type="checkbox" data-factor="f6"> F6 Tiered permission model, dangerous operations confirmed and audited</label></li>
             <li><label><input type="checkbox" data-factor="f7"> F7 Human confirmation gate with suspend-resume</label></li>
-            <li><label><input type="checkbox" data-factor="f8"> F8 Complete trace, replayable and debuggable</label></li>
-            <li><label><input type="checkbox" data-factor="f9"> F9 Failed runs can be reproduced / regression tested</label></li>
+            <li><label><input type="checkbox" data-factor="f8"> F8 Plan mode approval gate / goal mode with completion criteria</label></li>
+            <li><label><input type="checkbox" data-factor="f9"> F9 Per-task isolated workspace, artifacts persisted</label></li>
             <li><label><input type="checkbox" data-factor="f10"> F10 (Advanced) Multi-agent orchestration</label></li>
-            <li><label><input type="checkbox" data-factor="f11"> F11 Key behavior driven by configuration</label></li>
-            <li><label><input type="checkbox" data-factor="f12"> F12 Quantitative evaluation metrics and test suite</label></li>
+            <li><label><input type="checkbox" data-factor="f11"> F11 Behavior driven by config, runs reproducible</label></li>
+            <li><label><input type="checkbox" data-factor="f12"> F12 Trace-based metrics and continuous evaluation suite</label></li>
           </ul>
           <blockquote class="core-quote">Make it work first, then make it reliable, and only then make it complex.</blockquote>
           <footer>

@@ -17,15 +17,15 @@ A hands-on course covering:
   1. Single Agent Loop
   2. Explicit Tool Contract
   3. Context Budgeting
-  4. Failure-First Design
-  5. Graceful Degradation
-  6. Least-Privilege Tooling
+  4. Knowing When to Stop
+  5. Failure-First Design & Graceful Degradation
+  6. Permission Models
   7. Human-in-the-Loop Gates
-  8. Observable by Default
-  9. Reproducible Runs
+  8. Plan & Goal Modes
+  9. Workspace & Artifacts Management
   10. Composable Agents
-  11. Config-Driven Behavior
-  12. Continuous Evaluation
+  11. Config-Driven & Reproducible Runs
+  12. Observability & Continuous Evaluation
 - Tool use, planning, memory, sandboxing, and evaluation
 - Building production-ready agent workflows
 
@@ -38,18 +38,18 @@ This course pairs with the **[nano series](https://nano-harness.github.io)** —
 | F1 Single Agent Loop | [nano-agent architecture & turn loop](https://github.com/nano-harness/nano-agent/blob/main/docs/architecture/ARCHITECTURE.md) |
 | F2 Explicit Tool Contract | [nano-agent tool runtime](https://github.com/nano-harness/nano-agent/blob/main/docs/architecture/TOOL_RUNTIME.md) |
 | F3 Context Budgeting | [nano-agent context compression](https://github.com/nano-harness/nano-agent/blob/main/pkg/agent/context_compression.go) |
-| F4 Failure-First Design | [nano-agent retry / fallback / circuit-breaker](https://github.com/nano-harness/nano-agent/blob/main/NANO.md) |
-| F5 Graceful Degradation | [nano-agent multi-provider fallback routing](https://github.com/nano-harness/nano-agent/tree/main/pkg/llm) |
-| F6 Least-Privilege Tooling | [nano-agent sandbox design](https://github.com/nano-harness/nano-agent/blob/main/docs/architecture/SANDBOX_DESIGN.md) |
+| F4 Knowing When to Stop | [nano-agent turn termination policy](https://github.com/nano-harness/nano-agent/blob/main/pkg/agent/turn_policy.go) |
+| F5 Failure-First Design & Graceful Degradation | [nano-agent retry / fallback / circuit-breaker](https://github.com/nano-harness/nano-agent/blob/main/NANO.md) · [multi-provider fallback routing](https://github.com/nano-harness/nano-agent/tree/main/pkg/llm) |
+| F6 Permission Models | [nano-agent permission policy](https://github.com/nano-harness/nano-agent/blob/main/docs/development/PERMISSION_POLICY.md) · [auto-approval](https://github.com/nano-harness/nano-agent/blob/main/docs/development/PERMISSION_AUTO_APPROVAL.md) · [sandbox design](https://github.com/nano-harness/nano-agent/blob/main/docs/architecture/SANDBOX_DESIGN.md) |
 | F7 Human-in-the-Loop Gates | [nano-symphony plan approval gates](https://github.com/nano-harness/nano-symphony/blob/main/docs/plan-authoring.md) |
-| F8 Observable by Default | [nano-agent event schema](https://github.com/nano-harness/nano-agent/blob/main/docs/development/EVENT_SCHEMA.md) · [nano-symphony dashboard](https://github.com/nano-harness/nano-symphony) |
-| F9 Reproducible Runs | [nano-symphony workflow templates](https://github.com/nano-harness/nano-symphony/blob/main/docs/WORKFLOW-reference.md) · [nano-agent checkpointing](https://github.com/nano-harness/nano-agent/blob/main/docs/features/CHECKPOINTING.md) |
+| F8 Plan & Goal Modes | [nano-agent plan mode](https://github.com/nano-harness/nano-agent/blob/main/docs/features/PLAN_MODE.md) · [nano-symphony plan runs](https://github.com/nano-harness/nano-symphony) |
+| F9 Workspace & Artifacts Management | [nano-symphony workspaces & unified artifacts](https://github.com/nano-harness/nano-symphony) |
 | F10 Composable Agents | [nano-agent mailbox](https://github.com/nano-harness/nano-agent/blob/main/docs/features/MAILBOX.md) & [swarm](https://github.com/nano-harness/nano-agent/blob/main/docs/features/SWARM.md) · [nano-symphony roles ADR](https://github.com/nano-harness/nano-symphony/blob/main/docs/adr/001-multi-agent-roles-and-shared-contract.md) |
-| F11 Config-Driven Behavior | [nano-agent configuration](https://github.com/nano-harness/nano-agent/blob/main/docs/configuration.md) |
-| F12 Continuous Evaluation | [nano-agent SWE-bench evaluation](https://github.com/nano-harness/nano-agent/blob/main/swe_bench_test/README.md) |
+| F11 Config-Driven & Reproducible Runs | [nano-agent configuration](https://github.com/nano-harness/nano-agent/blob/main/docs/configuration.md) · [checkpointing](https://github.com/nano-harness/nano-agent/blob/main/docs/features/CHECKPOINTING.md) · [nano-symphony workflow templates](https://github.com/nano-harness/nano-symphony/blob/main/docs/WORKFLOW-reference.md) |
+| F12 Observability & Continuous Evaluation | [nano-agent event schema](https://github.com/nano-harness/nano-agent/blob/main/docs/development/EVENT_SCHEMA.md) · [SWE-bench evaluation](https://github.com/nano-harness/nano-agent/blob/main/swe_bench_test/README.md) · [nano-symphony metrics & dashboard](https://github.com/nano-harness/nano-symphony) |
 
-- [nano-agent](https://github.com/nano-harness/nano-agent) — the agent loop, tools, and context management (F1–F6, F11)
-- [nano-symphony](https://github.com/nano-harness/nano-symphony) — orchestration: HITL gates, observability, reproducible workflows, composable agents (F7–F10)
+- [nano-agent](https://github.com/nano-harness/nano-agent) — the agent loop, tools, context, permissions, termination (F1–F6, F8, F11)
+- [nano-symphony](https://github.com/nano-harness/nano-symphony) — orchestration: HITL gates, plan runs, workspaces & artifacts (F7–F10)
 - [nano-cloud](https://github.com/nano-harness/nano-cloud) — distributed execution for agent fleets (F9–F10)
 
 Suggested loop: learn the factor here → read it running in the nano codebases → build your own.

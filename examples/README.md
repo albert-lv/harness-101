@@ -12,15 +12,15 @@ examples/
 ├── factor-1/              # Single Agent Loop
 ├── factor-2/              # Explicit Tool Contract
 ├── factor-3/              # Context Budgeting
-├── factor-4/              # Failure-First Design
-├── factor-5/              # Graceful Degradation
-├── factor-6/              # Least-Privilege Tooling
+├── factor-4/              # Knowing When to Stop
+├── factor-5/              # Failure-First Design & Graceful Degradation
+├── factor-6/              # Permission Models
 ├── factor-7/              # Human-in-the-Loop Gates
-├── factor-8/              # Observable by Default
-├── factor-9/              # Reproducible Runs
+├── factor-8/              # Plan & Goal Modes
+├── factor-9/              # Workspace & Artifacts Management
 ├── factor-10/             # Composable Agents
-├── factor-11/             # Config-Driven Behavior
-└── factor-12/             # Continuous Evaluation
+├── factor-11/             # Config-Driven & Reproducible Runs
+└── factor-12/             # Observability & Continuous Evaluation
 ```
 
 Each Factor directory should ideally contain:
@@ -39,6 +39,8 @@ source .venv/bin/activate
 pip install -r requirements.txt
 python starter/xxx.py
 ```
+
+> Factors 4, 6, 8, 9, and 12 are pure standard-library simulations and run without an API key.
 
 ## Contributing Code Examples
 
